@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GamePay Cafe — Gaming Lounge &amp; Cafe</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0A0B0E;
+    --surface:#15171F;
+    --surface-hi:#1D212B;
+    --line: rgba(242,239,233,0.12);
+    --text:#F2EFE9;
+    --text-dim: rgba(242,239,233,0.60);
+    --copper:#E8A33D;
+    --copper-dim: rgba(232,163,61,0.16);
+    --cyan:#4DE8D1;
+    --cyan-dim: rgba(77,232,209,0.14);
+    --magenta:#FF4D6A;
+    --magenta-dim: rgba(255,77,106,0.14);
+    --radius: 12px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%2732%27%20height%3D%2732%27%3E%3Ctext%20x%3D%270%27%20y%3D%2724%27%20font-size%3D%2726%27%3E%F0%9F%94%AB%3C/text%3E%3C/svg%3E") 4 22, auto;}
+  input,textarea{ cursor:text; }
+  html{scroll-behavior:smooth;}
+  body{ background:var(--ink); color:var(--text); font-family:'Inter', sans-serif; line-height:1.5; overflow-x:hidden; position:relative; }
+  h1,h2,h3,.display{ font-family:'Space Grotesk', sans-serif; letter-spacing:-0.01em; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  a{color:inherit; text-decoration:none;}
+  button{ font-family:inherit; cursor:pointer; }
+  ::selection{ background:var(--copper); color:var(--ink); }
+
+  /* ---------- CLICK BLAST (gun-fire hit effect) ---------- */
+  .click-blast{ position:fixed; z-index:9999; pointer-events:none; font-size:26px; line-height:1;
+    transform:translate(-50%,-50%) scale(0.3); opacity:1;
+    animation: blastPop 0.45s ease-out forwards; filter:drop-shadow(0 0 8px rgba(255,150,60,0.7)); }
+  @keyframes blastPop{
+    0%{ transform:translate(-50%,-50%) scale(0.2) rotate(0deg); opacity:1; }
+    40%{ transform:translate(-50%,-50%) scale(1.15) rotate(8deg); opacity:1; }
+    100%{ transform:translate(-50%,-50%) scale(1.6) rotate(-6deg); opacity:0; }
+  }
+  .click-ring{ position:fixed; z-index:9998; pointer-events:none; width:10px; height:10px; border-radius:50%;
+    border:2px solid var(--copper); transform:translate(-50%,-50%) scale(0.3); opacity:0.9;
+    animation: ringPop 0.45s ease-out forwards; }
+  @keyframes ringPop{
+    0%{ transform:translate(-50%,-50%) scale(0.2); opacity:0.9; }
+    100%{ transform:translate(-50%,-50%) scale(3.2); opacity:0; }
+  }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; animation-iteration-count:1 !important; transition-duration:0.001ms !important; scroll-behavior:auto !important;} }
+  .wrap{ max-width:1500px; margin:0 auto; padding:0 40px; }
+  @media (min-width:1700px){ .wrap{ max-width:1700px; } }
+  @media (max-width:640px){ .wrap{ padding:0 20px; } }
+
+  /* ---------- SIDE HUD ACCENT BARS (fills the edges on wide screens) ---------- */
+  .side-hud{ position:fixed; top:0; bottom:0; width:34px; z-index:5; pointer-events:none; display:flex; align-items:center; justify-content:center; }
+  .side-hud.left{ left:0; border-right:1px solid var(--line); }
+  .side-hud.right{ right:0; border-left:1px solid var(--line); }
+  .side-hud span{ writing-mode:vertical-rl; font-family:'JetBrains Mono', monospace; font-size:0.68rem; letter-spacing:0.25em; color:var(--text-dim); text-transform:uppercase; }
+  .side-hud.right span{ transform:rotate(180deg); }
+  @media (max-width:1500px){ .side-hud{ display:none; } }
+
+  /* ---------- AMBIENT BG LAYERS (fills the "blank" feel) ---------- */
+  .grid-bg{ position:fixed; inset:0; z-index:-3; pointer-events:none;
+    background-image: linear-gradient(rgba(77,232,209,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(77,232,209,0.05) 1px, transparent 1px);
+    background-size:38px 38px;
+  }
+  .scanlines{ position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:0.5;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.018) 0px, rgba(255,255,255,0.018) 1px, transparent 1px, transparent 3px);
+  }
+  .glow-blob{ position:fixed; border-radius:50%; filter:blur(90px); z-index:-2; pointer-events:none; opacity:0.35; }
+  .glow1{ width:520px; height:520px; background:var(--cyan); top:-160px; right:-160px; }
+  .glow2{ width:460px; height:460px; background:var(--copper); bottom:-140px; left:-140px; }
+
+  /* ---------- NAV ---------- */
+  header{ position:sticky; top:0; z-index:100; background:rgba(10,11,14,0.88); backdrop-filter: blur(10px); border-bottom:1px solid var(--line); }
+  nav.wrap{ display:flex; align-items:center; justify-content:space-between; height:84px; }
+  .logo{ display:flex; align-items:center; gap:9px; font-weight:700; font-size:1.55rem; line-height:1; }
+  .logo-mark{ width:32px; height:32px; border-radius:8px; background: linear-gradient(135deg, var(--copper), var(--cyan)); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--ink); font-size:0.8rem; box-shadow:0 0 16px rgba(77,232,209,0.4); }
+  .nav-links{ display:flex; align-items:center; gap:24px; font-size:1rem; font-weight:700; font-family:'Space Grotesk', sans-serif; letter-spacing:0.02em; color:var(--text); flex-wrap:wrap; }
+  .nav-links > a, .nav-item > a{ text-transform:uppercase; font-size:0.92rem; transition:color .15s ease, text-shadow .15s ease; }
+  .nav-links a:hover{ color:var(--cyan); text-shadow:0 0 14px rgba(77,232,209,0.6); }
+  .nav-item{ position:relative; display:flex; align-items:center; padding:8px 0; }
+  .nav-dropdown{ position:absolute; top:100%; left:50%; transform:translateX(-50%); background:var(--surface-hi); border:1px solid var(--line); border-radius:9px; padding:8px; display:none; flex-direction:column; min-width:170px; box-shadow:0 14px 30px rgba(0,0,0,0.4); z-index:200; }
+  .nav-item:hover .nav-dropdown{ display:flex; }
+  .nav-dropdown a{ padding:8px 10px; border-radius:6px; font-size:0.82rem; font-weight:500; text-transform:none; letter-spacing:normal; white-space:nowrap; cursor:pointer; color:var(--text-dim); }
+  .nav-dropdown a:hover{ background:var(--cyan-dim); color:var(--cyan); }
+  .nav-right{ display:flex; align-items:center; gap:12px; }
+  .nav-socials{ display:flex; align-items:center; gap:6px; padding-right:6px; border-right:1px solid var(--line); margin-right:2px; }
+  .nav-socials a{ width:32px; height:32px; border-radius:8px; background:var(--surface-hi); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-size:0.92rem; transition:border-color .15s ease, transform .15s ease; }
+  .nav-socials a:hover{ border-color:var(--cyan); transform:translateY(-2px); }
+  @media (max-width:1200px){ .nav-socials{ display:none; } }
+  .points-chip{ font-family:'JetBrains Mono', monospace; font-size:0.74rem; background:var(--copper-dim); color:var(--copper); padding:7px 12px; border-radius:100px; display:none; align-items:center; gap:6px; }
+  .nav-cta{ padding:9px 16px; border-radius:100px; background:var(--copper); color:var(--ink); font-weight:600; font-size:0.82rem; white-space:nowrap; transition:transform .15s ease, box-shadow .15s ease; }
+  .nav-cta:hover{ transform:translateY(-1px); box-shadow:0 6px 18px var(--copper-dim); }
+  @media (max-width:980px){ .nav-links{ display:none; } }
+
+  /* ---------- HERO (fullscreen) ---------- */
+  .hero{ min-height:100svh; display:flex; flex-direction:column; justify-content:center; position:relative; border-bottom:1px solid var(--line); padding:90px 0 24px; }
+  .hero-corner{ position:absolute; width:60px; height:60px; border:2px solid var(--cyan); opacity:0.5; }
+  .hero-corner.tl{ top:80px; left:24px; border-right:none; border-bottom:none; }
+  .hero-corner.br{ bottom:24px; right:24px; border-left:none; border-top:none; border-color:var(--copper); }
+  .eyebrow{ display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono', monospace; font-size:0.76rem; color:var(--cyan); border:1px solid rgba(77,232,209,0.35); padding:6px 12px; border-radius:100px; margin-bottom:20px; }
+  .eyebrow .dot{ width:7px; height:7px; border-radius:50%; background:var(--cyan); animation: pulse 1.6s infinite ease-in-out;}
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.25;} }
+  .brand-shine{
+    font-family:'Russo One', sans-serif;
+    letter-spacing:0.01em;
+    background:linear-gradient(90deg, var(--text) 25%, var(--cyan) 55%, var(--copper) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    background-size:200% auto; animation: shine 6s linear infinite;
+    filter: drop-shadow(0 0 10px rgba(77,232,209,0.35));
+  }
+  @keyframes shine{ to{ background-position:200% center; } }
+
+  /* ---------- POSTER CAROUSEL (replaces old hero) ---------- */
+  .top-info{ padding:22px 0 18px; border-bottom:1px solid var(--line); }
+  .top-info-row{ display:flex; align-items:center; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .top-info .eyebrow{ margin-bottom:0; }
+  .top-info-addr{ font-size:0.86rem; color:var(--text-dim); }
+  .top-info-ctas{ display:flex; gap:10px; flex-wrap:wrap; }
+  .top-info-socials{ display:flex; flex-direction:row; gap:14px; align-items:center; }
+  .top-info-socials .hud-label{ font-size:0.9rem; font-weight:600; color:var(--text); letter-spacing:0.04em; }
+  .top-info-social-icons{ display:flex; gap:10px; flex-wrap:wrap; }
+  .top-info-social-icons a{ height:auto; width:auto; border-radius:100px; background:var(--surface-hi); border:1px solid var(--line); display:flex; align-items:center; gap:7px; padding:10px 16px; font-size:0.85rem; font-weight:600; color:var(--text); transition:border-color .15s ease, transform .15s ease, background .15s ease; }
+  .top-info-social-icons a:hover{ border-color:var(--cyan); transform:translateY(-2px); background:var(--cyan-dim); color:var(--cyan); }
+  .poster-carousel-wrap{ width:100%; overflow:hidden; border-bottom:1px solid var(--line); background:var(--surface); padding:26px 0; }
+  .poster-track{ display:flex; gap:18px; width:max-content; padding:0 24px; animation: poster-scroll 34s linear infinite; }
+  .poster-track:hover{ animation-play-state:paused; }
+  @keyframes poster-scroll{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+  .poster-card{ width:210px; height:300px; border-radius:14px; flex-shrink:0; position:relative; overflow:hidden; border:1px solid var(--line); display:flex; align-items:flex-end; padding:16px; transition:transform .2s ease; }
+  .poster-card:hover{ transform:translateY(-6px); }
+  .poster-card canvas{ position:absolute; inset:0; width:100%; height:100%; z-index:0; }
+  .poster-card::after{ content:""; position:absolute; inset:0; z-index:1; background:linear-gradient(to top, rgba(10,11,14,0.92), transparent 55%); }
+  .poster-card .p-tag{ position:relative; z-index:2; font-family:'JetBrains Mono', monospace; font-size:0.62rem; color:var(--cyan); background:rgba(10,11,14,0.5); padding:3px 8px; border-radius:100px; align-self:flex-start; margin-bottom:auto; }
+  .poster-card .p-title{ position:relative; z-index:2; font-family:'Space Grotesk', sans-serif; font-weight:700; font-size:1.15rem; color:var(--text); }
+  .poster-card .p-sub{ position:relative; z-index:2; font-family:'JetBrains Mono', monospace; font-size:0.66rem; color:var(--text-dim); margin-top:2px; }
+  .btn-primary{ background:var(--copper); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease; }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--copper-dim); }
+  .btn-cyan{ background:var(--cyan); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease;}
+  .btn-cyan:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--cyan-dim); }
+  .btn-ghost{ border:1px solid var(--line); padding:13px 24px; border-radius:9px; font-size:0.92rem; color:var(--text); font-weight:500; background:transparent; transition:border-color .15s ease, background .15s ease; }
+  .btn-ghost:hover{ border-color:var(--cyan); background:var(--cyan-dim); }
+
+  .hud{ margin-top:34px; background:rgba(21,23,31,0.8); border:1px solid var(--line); border-radius:var(--radius); display:grid; grid-template-columns:repeat(4,1fr); overflow:hidden; backdrop-filter:blur(6px); }
+  .hud-item{ padding:14px 16px; border-right:1px solid var(--line); }
+  .hud-item:last-child{ border-right:none; }
+  .hud-label{ font-family:'JetBrains Mono', monospace; font-size:0.62rem; letter-spacing:0.08em; color:var(--text-dim); text-transform:uppercase; }
+  .hud-value{ font-family:'JetBrains Mono', monospace; font-size:0.98rem; font-weight:700; color:var(--cyan); margin-top:5px; }
+  .hud-value.warm{ color:var(--copper); }
+  .scroll-cue{ margin-top:auto; text-align:center; font-family:'JetBrains Mono', monospace; font-size:0.7rem; color:var(--text-dim); animation:bob 2s infinite ease-in-out; }
+  @keyframes bob{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(6px);} }
+
+  /* ---------- MARQUEE ---------- */
+  .marquee-wrap{ border-bottom:1px solid var(--line); background:var(--surface); overflow:hidden; padding:12px 0; }
+  .marquee-track{ display:flex; gap:36px; white-space:nowrap; animation: scroll-left 24s linear infinite; width:max-content; }
+  @keyframes scroll-left{ from{ transform:translateX(0);} to{ transform:translateX(-50%);} }
+  .marquee-track span{ font-family:'JetBrains Mono', monospace; font-size:0.88rem; color:var(--text-dim); display:flex; align-items:center; gap:8px; }
+  .marquee-track span::before{ content:"◆"; color:var(--copper); }
+  .marquee-track a{ font-family:'JetBrains Mono', monospace; font-size:0.88rem; font-weight:700; color:var(--cyan); display:flex; align-items:center; gap:8px; transition:color .15s ease, text-shadow .15s ease; }
+  .marquee-track a::before{ content:"◆"; color:var(--copper); }
+  .marquee-track a:hover{ color:var(--copper); text-shadow:0 0 12px rgba(232,163,61,0.5); }
+
+  /* ---------- SECTION SHARED (tightened) ---------- */
+  section{ padding:52px 0; border-bottom:1px solid var(--line); position:relative; }
+  .section-head{ max-width:640px; margin-bottom:26px; display:flex; align-items:baseline; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+  .section-tag{ font-family:'JetBrains Mono', monospace; font-size:0.74rem; color:var(--copper); text-transform:uppercase; letter-spacing:0.08em; }
+  .section-head h2{ font-size:clamp(1.5rem,3.4vw,2.1rem); margin-top:6px; }
+  .section-head p{ color:var(--text-dim); margin-top:8px; font-size:0.92rem; }
+  .reveal{ opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---------- TABS ---------- */
+  .tab-bar{ display:flex; gap:8px; margin-bottom:22px; flex-wrap:wrap; }
+  .tab-btn{ font-family:'JetBrains Mono', monospace; font-size:0.8rem; padding:9px 16px; border-radius:8px; background:var(--surface); border:1px solid var(--line); color:var(--text-dim); transition:all .15s ease; }
+  .tab-btn.active{ background:var(--cyan); color:var(--ink); font-weight:700; border-color:var(--cyan); }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; animation: fadein .3s ease; }
+  @keyframes fadein{ from{opacity:0;} to{opacity:1;} }
+
+  /* ---------- CARDS ---------- */
+  .card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; transition:border-color .2s ease, transform .2s ease, box-shadow .2s ease; position:relative; overflow:hidden; }
+  .card:hover{ border-color:var(--cyan); transform:translateY(-3px); box-shadow:0 10px 26px rgba(77,232,209,0.08); }
+  .icon-box{ width:38px; height:38px; border-radius:9px; background:var(--cyan-dim); display:flex; align-items:center; justify-content:center; margin-bottom:12px; color:var(--cyan); font-size:1.15rem; }
+
+  /* ---------- SHOP ---------- */
+  .station-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+  .station-price{ font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--copper); font-size:0.95rem; border-top:1px dashed var(--line); padding-top:12px; margin-top:12px; }
+  .station-price span{ color:var(--text-dim); font-weight:400; font-size:0.74rem; }
+
+  /* ---------- RECEIPT / CAFE ---------- */
+  .receipt{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px 30px; max-width:640px; }
+  .receipt-top{ text-align:center; padding-bottom:14px; border-bottom:1px dashed var(--line); margin-bottom:4px; }
+  .menu-group{ margin-top:16px; }
+  .menu-group h4{ font-family:'JetBrains Mono', monospace; font-size:0.74rem; color:var(--cyan); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
+  .menu-row{ display:flex; justify-content:space-between; align-items:baseline; padding:6px 0; border-bottom:1px dotted rgba(242,239,233,0.12); font-size:0.88rem; }
+  .menu-row .price{ font-family:'JetBrains Mono', monospace; color:var(--copper); font-weight:600; }
+  .menu-row .item-desc{ display:block; color:var(--text-dim); font-size:0.74rem; margin-top:2px;}
+
+  /* ---------- COMBOS ---------- */
+  .combo-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  .combo-card{ background: linear-gradient(160deg, var(--surface) 0%, var(--surface-hi) 100%); border:1px solid var(--line); border-radius:var(--radius); padding:20px 18px; position:relative; transition:transform .2s ease, border-color .2s ease;}
+  .combo-card:hover{ transform:translateY(-3px); border-color:var(--copper); }
+  .combo-card.featured{ border-color:var(--copper); }
+  .combo-badge{ position:absolute; top:16px; right:16px; font-family:'JetBrains Mono', monospace; font-size:0.62rem; background:var(--copper); color:var(--ink); padding:4px 9px; border-radius:100px; font-weight:700; }
+  .combo-includes{ list-style:none; margin:12px 0; }
+  .combo-includes li{ font-size:0.82rem; color:var(--text-dim); padding:4px 0 4px 18px; position:relative; }
+  .combo-includes li::before{ content:"▹"; position:absolute; left:0; color:var(--cyan); }
+  .combo-price{ font-family:'JetBrains Mono', monospace; font-size:1.25rem; font-weight:700; border-top:1px solid var(--line); padding-top:12px; }
+  .combo-price span{ font-size:0.72rem; color:var(--text-dim); font-weight:400; }
+
+  /* ---------- TOURNAMENTS ---------- */
+  .table-wrap{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); overflow-x:auto; }
+  table{ width:100%; border-collapse:collapse; min-width:600px; }
+  th{ text-align:left; font-family:'JetBrains Mono', monospace; font-size:0.68rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); padding:12px 16px; border-bottom:1px solid var(--line); }
+  td{ padding:12px 16px; border-bottom:1px solid var(--line); font-size:0.86rem; }
+  tr:last-child td{ border-bottom:none; }
+  .status-pill{ font-family:'JetBrains Mono', monospace; font-size:0.68rem; padding:3px 9px; border-radius:100px; background:var(--cyan-dim); color:var(--cyan); font-weight:600; }
+  .status-pill.open{ background:var(--copper-dim); color:var(--copper); }
+  .status-pill.hot{ background:var(--magenta-dim); color:var(--magenta); }
+  .prize{ font-family:'JetBrains Mono', monospace; color:var(--copper); font-weight:600; }
+
+  /* ---------- VIDEO / VAULT (shared in Media tabs) ---------- */
+  .video-grid{ display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+  .video-grid.single{ grid-template-columns:1fr; }
+  .video-main{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .video-frame-wrap{ position:relative; padding-top:56.25%; background:#000; }
+  .video-frame-wrap.wide{ padding-top:42%; }
+  @media (max-width:780px){ .video-frame-wrap.wide{ padding-top:56.25%; } }
+  .video-frame-wrap iframe{ position:absolute; inset:0; width:100%; height:100%; border:0; }
+  .video-meta{ padding:14px 18px; }
+  .video-meta h3{ font-size:1rem; margin-bottom:4px; }
+  .share-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .share-btn{ font-size:0.74rem; padding:7px 11px; border-radius:7px; background:var(--surface-hi); border:1px solid var(--line); color:var(--text-dim); transition:border-color .15s ease, color .15s ease; }
+  .share-btn:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .video-list{ display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; }
+  .video-thumb{ display:flex; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:8px; cursor:pointer; transition:border-color .15s ease; }
+  .video-thumb:hover{ border-color:var(--cyan); }
+  .video-thumb .thumb-box{ width:78px; height:50px; border-radius:6px; background:linear-gradient(135deg,var(--surface-hi),var(--ink)); display:flex; align-items:center; justify-content:center; color:var(--cyan); flex-shrink:0; }
+  .video-thumb .thumb-title{ font-size:0.8rem; }
+  .video-thumb .thumb-sub{ font-size:0.68rem; color:var(--text-dim); margin-top:3px; }
+
+  .vault-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .vault-card h3{ padding:14px 16px 0; font-size:1.02rem; }
+  .vault-card p{ padding:6px 16px 0; color:var(--text-dim); font-size:0.84rem; }
+  .vault-tags{ display:flex; gap:6px; padding:12px 16px 16px; flex-wrap:wrap; }
+  .tag{ font-family:'JetBrains Mono', monospace; font-size:0.64rem; background:var(--cyan-dim); color:var(--cyan); padding:3px 9px; border-radius:100px; }
+
+  /* ---------- WALLPAPER GALLERY ---------- */
+  .wall-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+  .wall-card{ border-radius:10px; overflow:hidden; border:1px solid var(--line); position:relative; aspect-ratio:3/4; }
+  .wall-card canvas{ width:100%; height:100%; display:block; }
+  .wall-overlay{ position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:space-between; padding:10px; background:linear-gradient(to top, rgba(0,0,0,0.65), transparent 60%); opacity:0; transition:opacity .2s ease; }
+  .wall-card:hover .wall-overlay{ opacity:1; }
+  .wall-overlay span{ font-size:0.74rem; font-weight:600; }
+  .dl-btn{ background:var(--copper); color:var(--ink); border:none; border-radius:7px; padding:5px 9px; font-size:0.68rem; font-weight:700; }
+
+  /* ---------- MINI GAME ---------- */
+  .game-panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; display:grid; grid-template-columns:1fr 220px; gap:20px; align-items:center; }
+  #reactionBox{ width:100%; height:190px; border-radius:10px; background:var(--surface-hi); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace; font-size:1.05rem; font-weight:700; color:var(--text-dim); cursor:pointer; user-select:none; transition:background .15s ease; border:1px solid var(--line); }
+  #reactionBox.wait{ background:var(--magenta-dim); color:var(--magenta); }
+  #reactionBox.go{ background:var(--cyan-dim); color:var(--cyan); }
+  .game-stats div{ margin-bottom:12px; }
+  .game-stats .hud-label{ display:block; margin-bottom:3px; }
+  .game-stats .hud-value{ font-size:1.2rem; }
+
+  /* ---------- BOOKING ---------- */
+  .booking-panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px; max-width:640px; }
+  .steps{ display:flex; gap:8px; margin-bottom:20px; }
+  .step-pill{ flex:1; text-align:center; padding:8px; border-radius:7px; font-family:'JetBrains Mono', monospace; font-size:0.72rem; background:var(--surface-hi); color:var(--text-dim); }
+  .step-pill.active{ background:var(--copper); color:var(--ink); font-weight:700; }
+  .form-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .form-field{ display:flex; flex-direction:column; gap:5px; }
+  .form-field label{ font-size:0.76rem; color:var(--text-dim); font-family:'JetBrains Mono', monospace;}
+  .form-field select, .form-field input{ background:var(--surface-hi); border:1px solid var(--line); border-radius:7px; padding:10px 11px; color:var(--text); font-size:0.88rem; font-family:inherit; }
+  .form-field select:focus, .form-field input:focus{ outline:none; border-color:var(--cyan); }
+  .booking-summary{ background:var(--surface-hi); border-radius:9px; padding:14px; margin-top:16px; font-family:'JetBrains Mono', monospace; font-size:0.82rem; }
+  .booking-summary .row{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dotted var(--line); }
+  .booking-summary .row:last-child{ border-bottom:none; font-weight:700; color:var(--copper); }
+  .step-actions{ display:flex; justify-content:space-between; margin-top:18px; }
+  .demo-note{ font-size:0.72rem; color:var(--text-dim); margin-top:12px; font-family:'JetBrains Mono', monospace; }
+
+  /* ---------- MEMBERSHIP + PHOTO BOOTH ---------- */
+  .member-panel{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .member-box{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
+  .member-box h3{ margin-bottom:12px; font-size:1rem; }
+  .form-stack{ display:flex; flex-direction:column; gap:10px; }
+  .form-stack input{ background:var(--surface-hi); border:1px solid var(--line); border-radius:7px; padding:10px 11px; color:var(--text); font-size:0.88rem; }
+  .form-stack input:focus{ outline:none; border-color:var(--cyan); }
+  .plan-grid{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .plan-row{ display:flex; justify-content:space-between; align-items:center; background:var(--surface-hi); border-radius:8px; padding:10px 12px; }
+  .plan-row .price{ font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--copper); font-size:0.9rem; }
+  .plan-row button{ padding:6px 12px; border-radius:7px; border:none; background:var(--cyan); color:var(--ink); font-weight:600; font-size:0.76rem; }
+  .profile-row{ display:flex; align-items:center; justify-content:space-between; background:var(--surface-hi); border-radius:9px; padding:14px; margin-bottom:12px; }
+
+  .booth-wrap{ margin-top:20px; }
+  .booth-panel{ display:grid; grid-template-columns:1fr 1fr; gap:20px; align-items:start; }
+  .upload-zone{ border:2px dashed var(--line); border-radius:var(--radius); padding:28px 16px; text-align:center; background:var(--surface); cursor:pointer; transition:border-color .15s ease; }
+  .upload-zone:hover{ border-color:var(--cyan); }
+  .frame-select{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .frame-chip{ padding:7px 12px; border-radius:100px; background:var(--surface-hi); border:1px solid var(--line); font-size:0.76rem; color:var(--text-dim); }
+  .frame-chip.active{ background:var(--cyan); color:var(--ink); border-color:var(--cyan); font-weight:600; }
+  #boothCanvasWrap{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:14px; text-align:center; }
+  #boothCanvas{ max-width:100%; border-radius:9px; background:var(--surface-hi); }
+  .locked-banner{ background:var(--magenta-dim); color:var(--magenta); font-family:'JetBrains Mono', monospace; font-size:0.76rem; padding:10px 14px; border-radius:9px; margin-bottom:12px; }
+
+  /* ---------- REVIEWS ---------- */
+  .review-panel{ display:grid; grid-template-columns:1fr 1.4fr; gap:20px; }
+  .stars{ display:flex; gap:4px; font-size:1.3rem; margin-bottom:12px; }
+  .stars span{ cursor:pointer; color:var(--line); }
+  .stars span.active{ color:var(--copper); }
+  .review-list{ display:flex; flex-direction:column; gap:10px; max-height:340px; overflow-y:auto; }
+  .review-item{ background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:12px 14px; }
+  .review-item .r-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+  .review-item .r-name{ font-weight:600; font-size:0.86rem; }
+  .review-item .r-stars{ color:var(--copper); font-size:0.8rem; }
+  .review-item p{ color:var(--text-dim); font-size:0.82rem; }
+
+  /* ---------- CONTACT ---------- */
+  .contact-grid{ display:grid; grid-template-columns:1.1fr 1fr; gap:40px; }
+  .info-block{ margin-bottom:18px; }
+  .info-block .hud-label{ margin-bottom:6px; display:block; }
+  .info-block p.dim{ color:var(--text-dim); }
+  .social-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .social-card{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px; display:flex; align-items:center; gap:12px; transition:border-color .2s ease, transform .2s ease; }
+  .social-card:hover{ border-color:var(--cyan); transform:translateY(-2px); }
+  .social-icon{ width:34px; height:34px; border-radius:8px; background:var(--cyan-dim); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+  .social-card .handle{ font-weight:600; font-size:0.86rem; }
+  .social-card .plat{ font-size:0.7rem; color:var(--text-dim); }
+
+  footer{ padding:24px 0; }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
+  footer p{ font-size:0.78rem; color:var(--text-dim); }
+
+  .toast{ position:fixed; bottom:20px; right:20px; background:var(--surface-hi); border:1px solid var(--cyan); color:var(--text); padding:12px 18px; border-radius:9px; font-size:0.84rem; z-index:999; transform:translateY(120%); transition:transform .3s ease; max-width:270px; }
+  .toast.show{ transform:translateY(0); }
+
+  @media (max-width: 980px){
+    .station-grid{ grid-template-columns:repeat(2,1fr); }
+    .combo-grid{ grid-template-columns:1fr; }
+    .video-grid{ grid-template-columns:1fr; }
+    .vault-grid{ grid-template-columns:1fr; }
+    .wall-grid{ grid-template-columns:repeat(2,1fr); }
+    .game-panel{ grid-template-columns:1fr; }
+    .form-grid{ grid-template-columns:1fr; }
+    .booth-panel{ grid-template-columns:1fr; }
+    .member-panel{ grid-template-columns:1fr; }
+    .review-panel{ grid-template-columns:1fr; }
+    .contact-grid{ grid-template-columns:1fr; gap:28px; }
+  }
+  @media (max-width:520px){
+    .station-grid{ grid-template-columns:1fr; }
+    .wall-grid{ grid-template-columns:repeat(2,1fr); }
+    .social-grid{ grid-template-columns:1fr; }
+    section{ padding:40px 0; }
+    .hero{ padding:80px 0 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<div class="glow-blob glow1"></div>
+<div class="glow-blob glow2"></div>
+<div class="side-hud left"><span>GAMEPAY CAFE · EST. 2024 · GHAZIABAD</span></div>
+<div class="side-hud right"><span>STATIONS ONLINE 18/20 · PING &lt;5MS</span></div>
+
+<header>
+  <nav class="wrap">
+    <a href="#" class="logo" onclick="window.scrollTo({top:0, behavior:'smooth'}); return false;"><span class="brand-shine">GamePay Cafe</span></a>
+    <div class="nav-links">
+      <div class="nav-item">
+        <a href="#menu">Menu ▾</a>
+        <div class="nav-dropdown">
+          <a onclick="gotoTab('menu','tab-setup')">🖥️ The Setup</a>
+          <a onclick="gotoTab('menu','tab-cafe')">☕ Cafe Menu</a>
+          <a onclick="gotoTab('menu','tab-combos')">⚡ Combos</a>
+        </div>
+      </div>
+      <a href="#tournaments">Tournaments</a>
+      <div class="nav-item">
+        <a href="#media">Media ▾</a>
+        <div class="nav-dropdown">
+          <a onclick="gotoTab('media','tab-videos')">▶️ Videos</a>
+          <a onclick="gotoTab('media','tab-vault')">🎮 Game Vault</a>
+          <a onclick="gotoTab('media','tab-gallery')">🖼️ Wallpapers</a>
+          <a onclick="gotoTab('media','tab-play')">⚡ Mini Game</a>
+        </div>
+      </div>
+      <a href="#booking">Book</a><a href="#membership">Membership</a><a href="#reviews">Reviews</a><a href="#contact">Contact</a>
+    </div>
+    <div class="nav-right">
+      <div class="points-chip" id="navPoints">⚡ <span id="navPointsVal">0</span> pts</div>
+    </div>
+  </nav>
+</header>
+
+<!-- COMPACT INFO STRIP -->
+<div class="top-info">
+  <div class="wrap top-info-row">
+    <div class="top-info-socials">
+      <span class="hud-label">Follow Us</span>
+      <div class="top-info-social-icons">
+        <a href="https://www.instagram.com/gamepay.cafe" target="_blank" rel="noopener">📸 Instagram</a>
+        <a href="https://www.youtube.com/@gamepaycafe" target="_blank" rel="noopener">▶️ YouTube</a>
+        <a href="https://www.facebook.com/share/1HY6kg5oe3/" target="_blank" rel="noopener">📘 Facebook</a>
+        <a href="https://x.com/Gamepaycafe" target="_blank" rel="noopener">✖️ Twitter</a>
+        <a href="https://www.threads.com/@gamepaycafe" target="_blank" rel="noopener">🧵 Threads</a>
+        <a href="https://t.me/Gamepaycafe" target="_blank" rel="noopener">✈️ Telegram</a>
+      </div>
+    </div>
+    <div class="top-info-ctas">
+      <a href="#booking" class="btn-primary">Book a Station</a>
+      <a href="#media" class="btn-ghost">Watch Highlights</a>
+    </div>
+  </div>
+</div>
+
+<!-- FULL-WIDTH GAME POSTER CAROUSEL -->
+<div class="poster-carousel-wrap">
+  <div class="poster-track" id="posterTrack"></div>
+</div>
+
+<div class="marquee-wrap"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+<!-- MENU (tabbed: Setup / Cafe / Combos) -->
+<section id="menu">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Shop &amp; Cafe</div><h2>Setup, Menu &amp; Combos</h2></div></div>
+    <div class="tab-bar reveal">
+      <button class="tab-btn active" data-tab="tab-setup">🖥️ The Setup</button>
+      <button class="tab-btn" data-tab="tab-cafe">☕ Cafe Menu</button>
+      <button class="tab-btn" data-tab="tab-combos">⚡ Combos</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-setup">
+      <div class="station-grid">
+        <div class="card"><div class="icon-box">🖥️</div><h3>PC Gaming Bay</h3><p style="color:var(--text-dim);font-size:.85rem;margin-top:6px;">RTX 4070 rigs, 240Hz displays.</p><div class="station-price">₹90 <span>/ hour</span></div></div>
+        <div class="card"><div class="icon-box">🎮</div><h3>Console Zone</h3><p style="color:var(--text-dim);font-size:.85rem;margin-top:6px;">PS5 &amp; Xbox Series X, 4K HDR.</p><div class="station-price">₹80 <span>/ hour</span></div></div>
+        <div class="card"><div class="icon-box">🕶️</div><h3>VR Arena</h3><p style="color:var(--text-dim);font-size:.85rem;margin-top:6px;">Room-scale VR, curated library.</p><div class="station-price">₹150 <span>/ hour</span></div></div>
+        <div class="card"><div class="icon-box">👥</div><h3>Squad Room</h3><p style="color:var(--text-dim);font-size:.85rem;margin-top:6px;">Private 4-seat room for scrims.</p><div class="station-price">₹350 <span>/ hr (4 seats)</span></div></div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-cafe">
+      <div class="receipt">
+        <div class="receipt-top"><div class="mono" style="font-size:.75rem;color:var(--text-dim);">GAMEPAY CAFE · ORDER TICKET</div></div>
+        <div class="menu-group"><h4>Brews &amp; Blends</h4>
+          <div class="menu-row"><span>Cold Brew<span class="item-desc">Slow-steeped, over ice</span></span><span class="price">₹120</span></div>
+          <div class="menu-row"><span>Caramel Cortado<span class="item-desc">Espresso, steamed milk, caramel</span></span><span class="price">₹140</span></div>
+          <div class="menu-row"><span>Iced Matcha Latte<span class="item-desc">Ceremonial-grade matcha</span></span><span class="price">₹160</span></div>
+        </div>
+        <div class="menu-group"><h4>Power Snacks</h4>
+          <div class="menu-row"><span>Loaded Nachos<span class="item-desc">Cheese, jalapeño, salsa</span></span><span class="price">₹180</span></div>
+          <div class="menu-row"><span>Peri-Peri Fries<span class="item-desc">Crispy, peri spice</span></span><span class="price">₹110</span></div>
+          <div class="menu-row"><span>Grilled Chicken Sandwich<span class="item-desc">House sauce</span></span><span class="price">₹190</span></div>
+        </div>
+        <div class="menu-group"><h4>Energy Fuel</h4>
+          <div class="menu-row"><span>GamePay Energy Mocktail<span class="item-desc">House blend, no crash</span></span><span class="price">₹150</span></div>
+          <div class="menu-row"><span>Classic Energy Drink<span class="item-desc">Chilled can</span></span><span class="price">₹100</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-combos">
+      <div class="combo-grid">
+        <div class="combo-card"><h3>Grind Combo</h3><div style="color:var(--text-dim);font-size:.78rem;margin:4px 0;">Solo · 2 hour session</div>
+          <ul class="combo-includes"><li>2 hrs PC/Console station</li><li>1 Cold Brew or soft drink</li><li>1 Peri-Peri Fries</li></ul>
+          <div class="combo-price">₹280 <span>/ person</span></div></div>
+        <div class="combo-card featured"><div class="combo-badge">Most Booked</div><h3>Squad Combo</h3><div style="color:var(--text-dim);font-size:.78rem;margin:4px 0;">4 players · 3 hour session</div>
+          <ul class="combo-includes"><li>3 hrs Squad Room</li><li>4 Energy Mocktails</li><li>2 Loaded Nachos to share</li></ul>
+          <div class="combo-price">₹1,150 <span>/ squad</span></div></div>
+        <div class="combo-card"><h3>All-Nighter Combo</h3><div style="color:var(--text-dim);font-size:.78rem;margin:4px 0;">Solo · 6 hour overnight pass</div>
+          <ul class="combo-includes"><li>6 hrs any station (11PM–5AM)</li><li>Unlimited coffee refills</li><li>1 Grilled Chicken Sandwich</li></ul>
+          <div class="combo-price">₹550 <span>/ person</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOURNAMENTS -->
+<section id="tournaments">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// The Arena</div><h2>Tournaments</h2></div></div>
+    <div class="table-wrap reveal">
+      <table>
+        <thead><tr><th>Game</th><th>Format</th><th>Schedule</th><th>Entry</th><th>Prize</th><th></th></tr></thead>
+        <tbody>
+          <tr><td>Valorant</td><td>5v5 Bracket</td><td>Sat, 6 PM</td><td>₹200/team</td><td class="prize">₹5,000</td><td><span class="status-pill open">Open</span></td></tr>
+          <tr><td>EA FC 24</td><td>1v1 Knockout</td><td>Sun, 4 PM</td><td>₹100/player</td><td class="prize">₹2,500</td><td><span class="status-pill open">Open</span></td></tr>
+          <tr><td>Tekken 8</td><td>Double Elim.</td><td>Last Fri/month</td><td>₹150/player</td><td class="prize">₹3,000</td><td><span class="status-pill hot">Filling Fast</span></td></tr>
+          <tr><td>COD Mobile</td><td>4v4 Bracket</td><td>Monthly</td><td>₹250/team</td><td class="prize">₹6,000</td><td><span class="status-pill">Soon</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- MEDIA (tabbed: Videos / Vault / Wallpapers / Play) -->
+<section id="media">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Media Zone</div><h2>Videos, Games &amp; Wallpapers</h2></div></div>
+    <div class="tab-bar reveal">
+      <button class="tab-btn active" data-tab="tab-videos">▶️ Videos</button>
+      <button class="tab-btn" data-tab="tab-vault">🎮 Game Vault</button>
+      <button class="tab-btn" data-tab="tab-gallery">🖼️ Wallpapers</button>
+      <button class="tab-btn" data-tab="tab-play">⚡ Play a Mini Game</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-videos">
+      <div class="video-grid single">
+        <div class="video-main">
+          <div class="video-frame-wrap wide"><iframe id="mainVideo" src="https://www.youtube.com/embed/videoseries?list=UUMBCS8TmgdzQLVzK0aQoE3A&rel=0" title="GamePay Cafe — Latest Uploads" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+          <div class="video-meta">
+            <h3>▶️ GamePay Cafe — Latest Uploads</h3>
+            <p class="dim" style="font-size:0.8rem; margin-top:2px;">Auto-updates with our newest videos. Use the playlist panel on the right to jump to more.</p>
+            <div class="share-row">
+              <a class="share-btn" id="shareWA" href="https://wa.me/?text=Check%20out%20GamePay%20Cafe%20on%20YouTube%20-%20https://www.youtube.com/@gamepaycafe" target="_blank" rel="noopener">Share WhatsApp</a>
+              <button class="share-btn" onclick="copyLink()">Copy Channel Link</button>
+              <a class="share-btn" href="https://www.youtube.com/@gamepaycafe" target="_blank" rel="noopener">Open on YouTube</a>
+              <a class="share-btn" href="https://www.youtube.com/@gamepaycafe?sub_confirmation=1" target="_blank" rel="noopener">Subscribe</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-vault"><div class="vault-grid" id="vaultGrid"></div></div>
+    <div class="tab-panel" id="tab-gallery"><div class="wall-grid" id="wallGrid"></div></div>
+
+    <div class="tab-panel" id="tab-play">
+      <div class="game-panel">
+        <div id="reactionBox">Click to start</div>
+        <div class="game-stats">
+          <div><span class="hud-label">Last Reaction</span><div class="hud-value" id="lastReact">--- ms</div></div>
+          <div><span class="hud-label">Best Reaction</span><div class="hud-value warm" id="bestReact">--- ms</div></div>
+          <div><span class="hud-label">Attempts</span><div class="hud-value" id="attemptCount">0</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Reserve</div><h2>Book Your Station</h2><p>Demo checkout — connect Razorpay/Stripe to go live.</p></div></div>
+    <div class="booking-panel reveal">
+      <div class="steps">
+        <div class="step-pill active" id="stepPill1">1. Select</div>
+        <div class="step-pill" id="stepPill2">2. Slot</div>
+        <div class="step-pill" id="stepPill3">3. Pay</div>
+      </div>
+      <div id="bookStep1">
+        <div class="form-grid">
+          <div class="form-field"><label>Station Type</label>
+            <select id="bStation">
+              <option value="PC Gaming Bay|90">PC Gaming Bay — ₹90/hr</option>
+              <option value="Console Zone|80">Console Zone — ₹80/hr</option>
+              <option value="VR Arena|150">VR Arena — ₹150/hr</option>
+              <option value="Squad Room|350">Squad Room — ₹350/hr</option>
+            </select>
+          </div>
+          <div class="form-field"><label>Duration (hours)</label>
+            <select id="bDuration"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option></select>
+          </div>
+        </div>
+        <div class="step-actions"><span></span><button class="btn-primary" onclick="goStep(2)">Next: Choose Slot</button></div>
+      </div>
+      <div id="bookStep2" style="display:none;">
+        <div class="form-grid">
+          <div class="form-field"><label>Date</label><input type="date" id="bDate"></div>
+          <div class="form-field"><label>Time Slot</label><select id="bTime"><option>11:00 AM</option><option>1:00 PM</option><option>4:00 PM</option><option>7:00 PM</option><option>10:00 PM</option></select></div>
+        </div>
+        <div class="step-actions"><button class="btn-ghost" onclick="goStep(1)">Back</button><button class="btn-primary" onclick="goStep(3)">Next: Payment</button></div>
+      </div>
+      <div id="bookStep3" style="display:none;">
+        <div class="booking-summary" id="bookingSummary"></div>
+        <div class="form-grid" style="margin-top:14px;">
+          <div class="form-field"><label>Name</label><input type="text" id="bName" placeholder="Your name"></div>
+          <div class="form-field"><label>Phone</label><input type="tel" id="bPhone" placeholder="10-digit number"></div>
+        </div>
+        <div class="step-actions"><button class="btn-ghost" onclick="goStep(2)">Back</button><button class="btn-primary" onclick="confirmBooking()">Pay &amp; Confirm</button></div>
+        <div class="demo-note">⚠ Demo checkout — no real payment processed.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MEMBERSHIP + PHOTO BOOTH -->
+<section id="membership">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Membership</div><h2>Points, Login &amp; Photo Booth</h2><p>Local-browser demo — connect a backend to sync accounts.</p></div></div>
+    <div class="member-panel reveal">
+      <div class="member-box" id="loggedOutView">
+        <h3>Create Your GamePay ID</h3>
+        <div class="form-stack">
+          <input type="text" id="memName" placeholder="Display name">
+          <input type="tel" id="memPhone" placeholder="Phone number">
+          <button class="btn-cyan" onclick="signUp()">Sign Up — Get 100 Points</button>
+        </div>
+      </div>
+      <div class="member-box" id="loggedInView" style="display:none;">
+        <h3>Your Membership</h3>
+        <div class="profile-row"><div><div style="font-weight:600;" id="memProfileName">—</div><div style="font-size:.74rem;color:var(--text-dim);">GamePay Member</div></div><div class="hud-value warm" id="memProfilePoints">0 pts</div></div>
+        <button class="btn-ghost" onclick="logOut()">Log Out</button>
+      </div>
+      <div class="member-box">
+        <h3>Buy More Points</h3>
+        <div class="plan-grid">
+          <div class="plan-row"><span>50 Points</span><span class="price">₹49</span><button onclick="buyPoints(50)">Buy</button></div>
+          <div class="plan-row"><span>150 Points</span><span class="price">₹129</span><button onclick="buyPoints(150)">Buy</button></div>
+          <div class="plan-row"><span>Monthly Pass</span><span class="price">₹299</span><button onclick="buyPoints(500)">Subscribe</button></div>
+        </div>
+        <div class="demo-note">⚠ Demo purchase only.</div>
+      </div>
+    </div>
+
+    <div class="booth-wrap">
+      <h3 style="margin-bottom:12px; font-size:1.1rem;">GamePay Photo Booth</h3>
+      <div id="lockedBanner" class="locked-banner">🔒 Costs 20 points per use. Sign up above to unlock.</div>
+      <div class="booth-panel">
+        <div>
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('boothFile').click()">
+            <div style="font-size:1.8rem;">📷</div>
+            <p style="margin-top:8px;color:var(--text-dim);font-size:.86rem;">Click to upload your photo</p>
+            <input type="file" id="boothFile" accept="image/*" style="display:none;">
+          </div>
+          <div class="frame-select" id="frameSelect">
+            <div class="frame-chip active" data-frame="cyan">Cyan HUD</div>
+            <div class="frame-chip" data-frame="copper">Copper Arcade</div>
+            <div class="frame-chip" data-frame="magenta">Tournament</div>
+          </div>
+          <button class="btn-primary" style="margin-top:14px;" onclick="renderBooth()">Generate (20 pts)</button>
+        </div>
+        <div id="boothCanvasWrap">
+          <canvas id="boothCanvas" width="440" height="440"></canvas>
+          <div style="margin-top:10px;"><button class="btn-cyan" onclick="downloadBooth()">Download Image</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Community</div><h2>Comments &amp; Reviews</h2></div></div>
+    <div class="review-panel reveal">
+      <div class="card">
+        <h3 style="margin-bottom:10px; font-size:1rem;">Leave a Review</h3>
+        <div class="stars" id="starPicker"><span data-v="1">★</span><span data-v="2">★</span><span data-v="3">★</span><span data-v="4">★</span><span data-v="5">★</span></div>
+        <div class="form-stack">
+          <input type="text" id="revName" placeholder="Your name">
+          <input type="text" id="revText" placeholder="Write a short comment...">
+          <button class="btn-primary" onclick="submitReview()">Post Review</button>
+        </div>
+      </div>
+      <div class="review-list" id="reviewList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Connect</div><h2>Visit Us &amp; Follow Along</h2></div></div>
+    <div class="contact-grid">
+      <div class="reveal">
+        <div class="info-block"><span class="hud-label">Address</span><p>Shop No. 4, Vaishali Sector 4, Ghaziabad, Uttar Pradesh</p></div>
+        <div class="info-block"><span class="hud-label">Hours</span><p class="dim">Everyday · 11:00 AM – 1:00 AM</p></div>
+        <div class="info-block"><span class="hud-label">Contact</span><p>+91 98765 43210</p><p class="dim">hello@gamepaycafe.in</p></div>
+      </div>
+      <div class="reveal">
+        <div class="social-grid">
+          <a href="https://www.instagram.com/gamepay.cafe" target="_blank" rel="noopener" class="social-card"><div class="social-icon">📸</div><div><div class="handle">@gamepay.cafe</div><div class="plat">Instagram</div></div></a>
+          <a href="https://www.youtube.com/@gamepaycafe" target="_blank" rel="noopener" class="social-card"><div class="social-icon">▶️</div><div><div class="handle">GamePay Cafe</div><div class="plat">YouTube</div></div></a>
+          <a href="https://www.facebook.com/share/1HY6kg5oe3/" target="_blank" rel="noopener" class="social-card"><div class="social-icon">📘</div><div><div class="handle">GamePay Cafe</div><div class="plat">Facebook</div></div></a>
+          <a href="https://x.com/Gamepaycafe" target="_blank" rel="noopener" class="social-card"><div class="social-icon">✖️</div><div><div class="handle">@gamepaycafe</div><div class="plat">Twitter</div></div></a>
+          <a href="https://www.threads.com/@gamepaycafe" target="_blank" rel="noopener" class="social-card"><div class="social-icon">🧵</div><div><div class="handle">@gamepaycafe</div><div class="plat">Threads</div></div></a>
+          <a href="https://t.me/Gamepaycafe" target="_blank" rel="noopener" class="social-card"><div class="social-icon">✈️</div><div><div class="handle">GamePay Cafe</div><div class="plat">Telegram</div></div></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap"><p>© 2026 GamePay Cafe. All rights reserved.</p><p>Insert coin to continue.</p></div></footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- SCROLL REVEAL ---------- */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => { entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.1 });
+revealEls.forEach(el => io.observe(el));
+
+function showToast(msg){ const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(window._toastTimer); window._toastTimer = setTimeout(()=>t.classList.remove('show'), 3200); }
+
+function gotoTab(sectionId, tabId){
+  const section = document.getElementById(sectionId);
+  if(section) section.scrollIntoView({behavior:'smooth', block:'start'});
+  const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+  if(btn) setTimeout(()=>btn.click(), 350);
+}
+
+/* ---------- TABS (event delegation, works across all tab-bars) ---------- */
+document.querySelectorAll('.tab-bar').forEach(bar=>{
+  bar.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.tab-btn'); if(!btn) return;
+    const bar = btn.closest('.tab-bar');
+    bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const panelIds = [...bar.querySelectorAll('.tab-btn')].map(b=>b.dataset.tab);
+    panelIds.forEach(id=>{
+      const panel = document.getElementById(id);
+      if(panel) panel.classList.toggle('active', id === btn.dataset.tab);
+    });
+  });
+});
+
+/* ---------- POSTER CAROUSEL ---------- */
+const posterGames = [
+  { title:"Escape the Backrooms", sub:"Horror · Co-op", c1:"#2a1010", c2:"#0A0B0E", icon:"🚪", accent:"#FF4D6A" },
+  { title:"007 First Light", sub:"Action · Spy Thriller", c1:"#101c30", c2:"#0A0B0E", icon:"🕶️", accent:"#E8A33D" },
+  { title:"UFC 6", sub:"Sports · Fighting", c1:"#301414", c2:"#0A0B0E", icon:"🥊", accent:"#FF4D6A" },
+  { title:"EA Sports FC 26", sub:"Sports · Football", c1:"#0d2a1a", c2:"#0A0B0E", icon:"⚽", accent:"#4DE8D1" },
+  { title:"NBA 2K26", sub:"Sports · Basketball", c1:"#3a2410", c2:"#0A0B0E", icon:"🏀", accent:"#E8A33D" },
+  { title:"Minecraft", sub:"Sandbox · Survival", c1:"#173a1c", c2:"#0A0B0E", icon:"⛏️", accent:"#4DE8D1" },
+  { title:"NBA The Run", sub:"Sports · Streetball", c1:"#28103a", c2:"#0A0B0E", icon:"🏀", accent:"#FF4D6A" },
+  { title:"Grand Theft Auto V", sub:"Open World", c1:"#301a3a", c2:"#0A0B0E", icon:"🚗", accent:"#E8A33D" },
+  { title:"LEGO Batman: Legacy of the Dark Knight", sub:"Action · Adventure", c1:"#101830", c2:"#0A0B0E", icon:"🦇", accent:"#4DE8D1" },
+  { title:"MLB The Show 26", sub:"Sports · Baseball", c1:"#0d2a20", c2:"#0A0B0E", icon:"⚾", accent:"#E8A33D" },
+  { title:"Call of Duty: Black Ops 7", sub:"FPS · Battle", c1:"#3a1414", c2:"#0A0B0E", icon:"🔫", accent:"#FF4D6A" },
+  { title:"Forza Horizon 5", sub:"Racing · Open World", c1:"#10243a", c2:"#0A0B0E", icon:"🏎️", accent:"#4DE8D1" },
+  { title:"Resident Evil 4", sub:"Survival Horror", c1:"#1c2a10", c2:"#0A0B0E", icon:"🧟", accent:"#FF4D6A" },
+  { title:"Ghost of Yōtei", sub:"Action RPG · Samurai", c1:"#3a2a10", c2:"#0A0B0E", icon:"⚔️", accent:"#E8A33D" },
+  { title:"Mortal Kombat 1", sub:"Fighting", c1:"#3a1010", c2:"#0A0B0E", icon:"🐉", accent:"#FF4D6A" },
+  { title:"Final Fantasy VII Rebirth", sub:"RPG · Adventure", c1:"#1c1030", c2:"#0A0B0E", icon:"🗡️", accent:"#4DE8D1" },
+  { title:"ARK: Survival Ascended", sub:"Survival · Open World", c1:"#243a14", c2:"#0A0B0E", icon:"🦖", accent:"#E8A33D" },
+  { title:"Star Wars Jedi: Survivor", sub:"Action Adventure", c1:"#101c30", c2:"#0A0B0E", icon:"⚔️", accent:"#4DE8D1" },
+  { title:"Ready or Not", sub:"Tactical Shooter", c1:"#241414", c2:"#0A0B0E", icon:"🚨", accent:"#FF4D6A" },
+  { title:"Poppy Playtime: Chapter 5", sub:"Horror · Puzzle", c1:"#3a2a10", c2:"#0A0B0E", icon:"🧸", accent:"#E8A33D" },
+];
+const posterTrack = document.getElementById('posterTrack');
+function drawPosterArt(canvas, g){
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  // base gradient
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0, g.c1); grad.addColorStop(1, g.c2);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+  // radial glow behind icon
+  const rg = ctx.createRadialGradient(w/2,h*0.42,10,w/2,h*0.42,w*0.6);
+  rg.addColorStop(0, g.accent + "55"); rg.addColorStop(1, "transparent");
+  ctx.fillStyle = rg; ctx.fillRect(0,0,w,h);
+  // subtle grid texture
+  ctx.strokeStyle = "rgba(255,255,255,0.04)"; ctx.lineWidth = 1;
+  for(let x=0;x<w;x+=28){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=0;y<h;y+=28){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  // glossy diagonal streak
+  ctx.save();
+  ctx.translate(w*0.15, 0); ctx.rotate(-0.35);
+  const streak = ctx.createLinearGradient(0,0,w*0.5,0);
+  streak.addColorStop(0, "rgba(255,255,255,0.10)"); streak.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = streak; ctx.fillRect(-40, -h*0.3, w*0.35, h*1.8);
+  ctx.restore();
+  // big icon
+  ctx.font = `${w*0.34}px serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = g.accent; ctx.shadowBlur = 22;
+  ctx.fillText(g.icon, w/2, h*0.42);
+  ctx.shadowBlur = 0;
+  // vignette edges
+  const vg = ctx.createRadialGradient(w/2,h/2,h*0.3,w/2,h/2,h*0.75);
+  vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,0.55)");
+  ctx.fillStyle = vg; ctx.fillRect(0,0,w,h);
+}
+[...posterGames, ...posterGames].forEach(g=>{
+  const card = document.createElement('div');
+  card.className = 'poster-card';
+  const canvas = document.createElement('canvas');
+  canvas.width = 420; canvas.height = 600;
+  drawPosterArt(canvas, g);
+  card.appendChild(canvas);
+  const overlay = document.createElement('div');
+  overlay.style.position='relative'; overlay.style.zIndex='2'; overlay.style.width='100%';
+  overlay.innerHTML = `<span class="p-tag">NOW PLAYING</span><div><div class="p-title">${g.title}</div><div class="p-sub">${g.sub}</div></div>`;
+  card.appendChild(overlay);
+  posterTrack.appendChild(card);
+});
+
+/* ---------- MARQUEE ---------- */
+const marqueeText = ["🎮 DON'T MISS THE NEXT LEVEL! 🚀 Follow & Subscribe NOW for 🎁 Exclusive Offers, 🏆 Tournaments, 🎮 Gaming Tips & 🎉 Giveaways"];
+const marqueeSocials = [
+  { icon:"📸", label:"Instagram", href:"https://www.instagram.com/gamepay.cafe" },
+  { icon:"▶️", label:"YouTube", href:"https://www.youtube.com/@gamepaycafe" },
+  { icon:"📘", label:"Facebook", href:"https://www.facebook.com/share/1HY6kg5oe3/" },
+  { icon:"✖️", label:"Twitter", href:"https://x.com/Gamepaycafe" },
+  { icon:"🧵", label:"Threads", href:"https://www.threads.com/@gamepaycafe" },
+  { icon:"✈️", label:"Telegram", href:"https://t.me/Gamepaycafe" },
+];
+const track = document.getElementById('marqueeTrack');
+function buildMarqueeItems(){
+  marqueeText.forEach(t=>{ const s = document.createElement('span'); s.textContent = t; track.appendChild(s); });
+  marqueeSocials.forEach(soc=>{
+    const a = document.createElement('a');
+    a.href = soc.href; a.target = '_blank'; a.rel = 'noopener';
+    a.textContent = `${soc.icon} ${soc.label}`;
+    track.appendChild(a);
+  });
+}
+buildMarqueeItems(); buildMarqueeItems();
+
+/* ---------- VIDEOS (real auto-updating uploads playlist embed above; no fake data needed) ---------- */
+function copyLink(){ navigator.clipboard?.writeText(`https://www.youtube.com/@gamepaycafe`).then(()=>showToast('Channel link copied to clipboard!')); }
+
+/* ---------- GAME VAULT ---------- */
+const vaultGames = [
+  { id:"dQw4w9WgXcQ", title:"Valorant", desc:"Tactical 5v5 shooter — precise gunplay meets agent abilities.", tags:["FPS","Tactical","5v5"] },
+  { id:"dQw4w9WgXcQ", title:"Tekken 8", desc:"The legendary fighting franchise with deep story mode.", tags:["Fighting","1v1","Story"] },
+  { id:"dQw4w9WgXcQ", title:"EA FC 24", desc:"The definitive football sim — Ultimate Team or Clubs.", tags:["Sports","1v1","Career"] },
+  { id:"dQw4w9WgXcQ", title:"COD: Warzone", desc:"Battle royale mayhem — drop in, loot up, survive.", tags:["Battle Royale","Squad","FPS"] },
+];
+const vaultGrid = document.getElementById('vaultGrid');
+vaultGames.forEach(g=>{
+  const el = document.createElement('div'); el.className = 'card vault-card'; el.style.padding = '0';
+  el.innerHTML = `<div class="video-frame-wrap"><iframe src="https://www.youtube.com/embed/${g.id}?rel=0" title="${g.title} trailer" allowfullscreen></iframe></div>
+    <h3>${g.title}</h3><p>${g.desc}</p><div class="vault-tags">${g.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>`;
+  vaultGrid.appendChild(el);
+});
+
+/* ---------- WALLPAPER GALLERY ---------- */
+const wallThemes = [
+  { name:"Neon Arena", c1:"#4DE8D1", c2:"#0A0B0E" },
+  { name:"Copper Rig", c1:"#E8A33D", c2:"#15171F" },
+  { name:"Tournament Night", c1:"#FF4D6A", c2:"#0A0B0E" },
+  { name:"Squad Up", c1:"#4DE8D1", c2:"#E8A33D" },
+];
+const wallGrid = document.getElementById('wallGrid');
+wallThemes.forEach((theme)=>{
+  const cardWrap = document.createElement('div'); cardWrap.className = 'wall-card';
+  const canvas = document.createElement('canvas'); canvas.width = 450; canvas.height = 600;
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,450,600);
+  grad.addColorStop(0, theme.c1); grad.addColorStop(1, theme.c2);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,450,600);
+  ctx.globalAlpha = 0.15;
+  for(let j=0;j<40;j++){ ctx.beginPath(); ctx.arc(Math.random()*450, Math.random()*600, Math.random()*60+10, 0, Math.PI*2); ctx.fillStyle = "#0A0B0E"; ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = "rgba(10,11,14,0.55)"; ctx.fillRect(0,500,450,100);
+  ctx.fillStyle = "#F2EFE9"; ctx.font = "bold 26px Arial"; ctx.fillText("GAMEPAY CAFE", 24, 550);
+  ctx.font = "16px Arial"; ctx.fillStyle="rgba(242,239,233,0.8)"; ctx.fillText(theme.name, 24, 578);
+  cardWrap.appendChild(canvas);
+  const overlay = document.createElement('div'); overlay.className = 'wall-overlay';
+  overlay.innerHTML = `<span>${theme.name}</span><button class="dl-btn">Download</button>`;
+  overlay.querySelector('button').onclick = ()=>{ const link = document.createElement('a'); link.download = `gamepay-cafe-${theme.name.replace(/\s+/g,'-').toLowerCase()}.png`; link.href = canvas.toDataURL(); link.click(); };
+  cardWrap.appendChild(overlay);
+  wallGrid.appendChild(cardWrap);
+});
+
+/* ---------- REACTION MINI GAME ---------- */
+const box = document.getElementById('reactionBox');
+let gameState = 'idle', startTime = 0, timeoutId;
+let best = localStorage.getItem('gp_best_reaction');
+if(best) document.getElementById('bestReact').textContent = best + ' ms';
+let attempts = parseInt(localStorage.getItem('gp_attempts') || '0');
+document.getElementById('attemptCount').textContent = attempts;
+box.addEventListener('click', ()=>{
+  if(gameState === 'idle'){
+    gameState = 'waiting'; box.textContent = 'Wait for it...'; box.className='wait';
+    const delay = 1000 + Math.random()*2500;
+    timeoutId = setTimeout(()=>{ gameState = 'go'; box.textContent = 'CLICK NOW!'; box.className='go'; startTime = Date.now(); }, delay);
+  } else if(gameState === 'waiting'){
+    clearTimeout(timeoutId); box.textContent = 'Too soon! Click to retry'; box.className=''; gameState='idle';
+  } else if(gameState === 'go'){
+    const reaction = Date.now() - startTime;
+    document.getElementById('lastReact').textContent = reaction + ' ms';
+    attempts++; localStorage.setItem('gp_attempts', attempts);
+    document.getElementById('attemptCount').textContent = attempts;
+    if(!best || reaction < parseInt(best)){ best = reaction; localStorage.setItem('gp_best_reaction', best); document.getElementById('bestReact').textContent = best + ' ms'; showToast('New best reaction time! 🏆'); }
+    box.textContent = 'Click to try again'; box.className=''; gameState='idle';
+  }
+});
+
+/* ---------- BOOKING FLOW ---------- */
+function goStep(n){
+  [1,2,3].forEach(i=>{ document.getElementById('bookStep'+i).style.display = i===n ? 'block' : 'none'; document.getElementById('stepPill'+i).classList.toggle('active', i===n); });
+  if(n===3) buildSummary();
+}
+function buildSummary(){
+  const [station, price] = document.getElementById('bStation').value.split('|');
+  const hours = document.getElementById('bDuration').value;
+  const date = document.getElementById('bDate').value || 'Today';
+  const time = document.getElementById('bTime').value;
+  const total = parseInt(price) * parseInt(hours);
+  document.getElementById('bookingSummary').innerHTML = `<div class="row"><span>Station</span><span>${station}</span></div><div class="row"><span>Duration</span><span>${hours} hr(s)</span></div><div class="row"><span>Slot</span><span>${date} · ${time}</span></div><div class="row"><span>Total</span><span>₹${total}</span></div>`;
+}
+function confirmBooking(){
+  const name = document.getElementById('bName').value.trim();
+  const phone = document.getElementById('bPhone').value.trim();
+  if(!name || !phone){ showToast('Please enter your name and phone number.'); return; }
+  const bookings = JSON.parse(localStorage.getItem('gp_bookings') || '[]');
+  bookings.push({ name, phone, station: document.getElementById('bStation').value, date: document.getElementById('bDate').value, time: document.getElementById('bTime').value, ts: Date.now() });
+  localStorage.setItem('gp_bookings', JSON.stringify(bookings));
+  showToast(`Booking confirmed for ${name}! (Demo — no real charge made)`);
+  goStep(1); document.getElementById('bName').value=''; document.getElementById('bPhone').value='';
+}
+
+/* ---------- MEMBERSHIP / POINTS ---------- */
+function refreshMemberUI(){
+  const member = JSON.parse(localStorage.getItem('gp_member') || 'null');
+  const navChip = document.getElementById('navPoints');
+  if(member){
+    document.getElementById('loggedOutView').style.display='none';
+    document.getElementById('loggedInView').style.display='block';
+    document.getElementById('memProfileName').textContent = member.name;
+    document.getElementById('memProfilePoints').textContent = member.points + ' pts';
+    navChip.style.display='flex'; document.getElementById('navPointsVal').textContent = member.points;
+    document.getElementById('lockedBanner').textContent = `✅ Logged in as ${member.name} — Photo Booth costs 20 points per use.`;
+  } else {
+    document.getElementById('loggedOutView').style.display='block';
+    document.getElementById('loggedInView').style.display='none';
+    navChip.style.display='none';
+    document.getElementById('lockedBanner').textContent = `🔒 Costs 20 points per use. Sign up above to unlock.`;
+  }
+}
+function signUp(){
+  const name = document.getElementById('memName').value.trim();
+  const phone = document.getElementById('memPhone').value.trim();
+  if(!name || !phone){ showToast('Enter a display name and phone number.'); return; }
+  localStorage.setItem('gp_member', JSON.stringify({ name, phone, points: 100 }));
+  showToast(`Welcome ${name}! You got 100 points 🎉`); refreshMemberUI();
+}
+function logOut(){ localStorage.removeItem('gp_member'); showToast('Logged out.'); refreshMemberUI(); }
+function buyPoints(amount){
+  const member = JSON.parse(localStorage.getItem('gp_member') || 'null');
+  if(!member){ showToast('Sign up first to buy points.'); return; }
+  member.points += amount; localStorage.setItem('gp_member', JSON.stringify(member));
+  showToast(`+${amount} points added (demo purchase, no real charge).`); refreshMemberUI();
+}
+refreshMemberUI();
+
+/* ---------- PHOTO BOOTH ---------- */
+let boothImage = null, boothFrame = 'cyan';
+document.getElementById('boothFile').addEventListener('change', (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev)=>{ const img = new Image(); img.onload = ()=>{ boothImage = img; renderBooth(true); }; img.src = ev.target.result; };
+  reader.readAsDataURL(file);
+});
+document.querySelectorAll('.frame-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('.frame-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active'); boothFrame = chip.dataset.frame;
+    if(boothImage) renderBooth(true);
+  });
+});
+function renderBooth(skipCharge){
+  const canvas = document.getElementById('boothCanvas'); const ctx = canvas.getContext('2d');
+  ctx.clearRect(0,0,440,440);
+  if(!boothImage){ showToast('Upload a photo first.'); return; }
+  if(!skipCharge){
+    const member = JSON.parse(localStorage.getItem('gp_member') || 'null');
+    if(!member){ showToast('Sign up and log in to use the Photo Booth.'); return; }
+    if(member.points < 20){ showToast('Not enough points — buy more below.'); return; }
+    member.points -= 20; localStorage.setItem('gp_member', JSON.stringify(member));
+    refreshMemberUI(); showToast('20 points used — generating your image!');
+  }
+  const colors = { cyan:"#4DE8D1", copper:"#E8A33D", magenta:"#FF4D6A" };
+  const accent = colors[boothFrame];
+  const size = Math.min(boothImage.width, boothImage.height);
+  const sx = (boothImage.width - size)/2, sy = (boothImage.height - size)/2;
+  ctx.drawImage(boothImage, sx, sy, size, size, 18, 18, 404, 404);
+  const grad = ctx.createLinearGradient(0,300,0,440);
+  grad.addColorStop(0, 'rgba(10,11,14,0)'); grad.addColorStop(1, 'rgba(10,11,14,0.85)');
+  ctx.fillStyle = grad; ctx.fillRect(18,300,404,140);
+  ctx.strokeStyle = accent; ctx.lineWidth = 6; ctx.strokeRect(18,18,404,404);
+  ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.strokeRect(9,9,422,422);
+  ctx.fillStyle = accent;
+  ctx.fillRect(18,18,36,4); ctx.fillRect(18,18,4,36);
+  ctx.fillRect(386,418,36,4); ctx.fillRect(418,386,4,36);
+  ctx.fillStyle = "#F2EFE9"; ctx.font = "bold 20px Arial"; ctx.fillText("GAMEPAY CAFE", 36, 400);
+  ctx.font = "12px monospace"; ctx.fillStyle = accent; ctx.fillText("PLAYER PROFILE · LEVEL UP", 36, 418);
+}
+function downloadBooth(){ const canvas = document.getElementById('boothCanvas'); const link = document.createElement('a'); link.download = 'gamepay-cafe-photo-booth.png'; link.href = canvas.toDataURL(); link.click(); }
+
+/* ---------- REVIEWS ---------- */
+let selectedStars = 5;
+document.querySelectorAll('#starPicker span').forEach(star=>{
+  star.addEventListener('click', ()=>{ selectedStars = parseInt(star.dataset.v); document.querySelectorAll('#starPicker span').forEach(s=>{ s.classList.toggle('active', parseInt(s.dataset.v) <= selectedStars); }); });
+});
+document.querySelectorAll('#starPicker span').forEach(s=>{ if(parseInt(s.dataset.v)<=5) s.classList.add('active'); });
+function loadReviews(){
+  const seed = [{ name:"Rohan", stars:5, text:"Best gaming cafe in Ghaziabad, PC specs are top notch!" },{ name:"Priya", stars:4, text:"Loved the Squad Room for our Valorant scrims. Coffee's great too." }];
+  const stored = JSON.parse(localStorage.getItem('gp_reviews') || 'null'); return stored || seed;
+}
+function renderReviews(){
+  const list = document.getElementById('reviewList'); list.innerHTML = '';
+  loadReviews().slice().reverse().forEach(r=>{
+    const el = document.createElement('div'); el.className = 'review-item';
+    el.innerHTML = `<div class="r-top"><span class="r-name">${r.name}</span><span class="r-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</span></div><p>${r.text}</p>`;
+    list.appendChild(el);
+  });
+}
+function submitReview(){
+  const name = document.getElementById('revName').value.trim();
+  const text = document.getElementById('revText').value.trim();
+  if(!name || !text){ showToast('Add your name and a comment.'); return; }
+  const reviews = loadReviews(); reviews.push({ name, stars: selectedStars, text });
+  localStorage.setItem('gp_reviews', JSON.stringify(reviews));
+  document.getElementById('revName').value=''; document.getElementById('revText').value='';
+  showToast('Thanks for your review!'); renderReviews();
+}
+renderReviews();
+</script>
+
+<script>
+/* ---------- CLICK BLAST EFFECT ---------- */
+document.addEventListener('click', (e)=>{
+  const blast = document.createElement('div');
+  blast.className = 'click-blast';
+  blast.textContent = '💥';
+  blast.style.left = e.clientX + 'px';
+  blast.style.top = e.clientY + 'px';
+  document.body.appendChild(blast);
+
+  const ring = document.createElement('div');
+  ring.className = 'click-ring';
+  ring.style.left = e.clientX + 'px';
+  ring.style.top = e.clientY + 'px';
+  document.body.appendChild(ring);
+
+  setTimeout(()=>{ blast.remove(); ring.remove(); }, 480);
+});
+</script>
+</body>
+</html>
