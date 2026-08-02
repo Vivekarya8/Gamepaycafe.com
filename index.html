@@ -237,7 +237,8 @@
   .video-list{ display:flex; flex-direction:column; gap:10px; max-height:420px; overflow-y:auto; }
   .video-thumb{ display:flex; gap:10px; background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:8px; cursor:pointer; transition:border-color .15s ease; }
   .video-thumb:hover{ border-color:var(--cyan); }
-  .video-thumb .thumb-box{ width:78px; height:50px; border-radius:6px; background:linear-gradient(135deg,var(--surface-hi),var(--ink)); display:flex; align-items:center; justify-content:center; color:var(--cyan); flex-shrink:0; }
+  .video-thumb .thumb-box{ width:78px; height:50px; border-radius:6px; background:linear-gradient(135deg,var(--surface-hi),var(--ink)); background-size:cover; background-position:center; display:flex; align-items:center; justify-content:center; color:var(--cyan); flex-shrink:0; position:relative; }
+  .video-thumb .thumb-box::after{ content:"▶"; position:relative; z-index:1; text-shadow:0 0 6px rgba(0,0,0,0.8); }
   .video-thumb .thumb-title{ font-size:0.8rem; }
   .video-thumb .thumb-sub{ font-size:0.68rem; color:var(--text-dim); margin-top:3px; }
 
@@ -509,20 +510,20 @@
     </div>
 
     <div class="tab-panel active" id="tab-videos">
-      <div class="video-grid single">
+      <div class="video-grid">
         <div class="video-main">
-          <div class="video-frame-wrap wide"><iframe id="mainVideo" src="https://www.youtube.com/embed/videoseries?list=UUMBCS8TmgdzQLVzK0aQoE3A&rel=0" title="GamePay Cafe — Latest Uploads" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+          <div class="video-frame-wrap"><iframe id="mainVideo" src="https://www.youtube.com/embed/sPm45Y7ZLv8?rel=0" title="GamePay Cafe video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
           <div class="video-meta">
-            <h3>▶️ GamePay Cafe — Latest Uploads</h3>
-            <p class="dim" style="font-size:0.8rem; margin-top:2px;">Auto-updates with our newest videos. Use the playlist panel on the right to jump to more.</p>
+            <h3 id="mainVideoTitle">GamePay Cafe Highlights</h3>
             <div class="share-row">
-              <a class="share-btn" id="shareWA" href="https://wa.me/?text=Check%20out%20GamePay%20Cafe%20on%20YouTube%20-%20https://www.youtube.com/@gamepaycafe" target="_blank" rel="noopener">Share WhatsApp</a>
-              <button class="share-btn" onclick="copyLink()">Copy Channel Link</button>
+              <a class="share-btn" id="shareWA" target="_blank" rel="noopener">Share WhatsApp</a>
+              <button class="share-btn" onclick="copyLink()">Copy Link</button>
               <a class="share-btn" href="https://www.youtube.com/@gamepaycafe" target="_blank" rel="noopener">Open on YouTube</a>
               <a class="share-btn" href="https://www.youtube.com/@gamepaycafe?sub_confirmation=1" target="_blank" rel="noopener">Subscribe</a>
             </div>
           </div>
         </div>
+        <div class="video-list" id="videoList"></div>
       </div>
     </div>
 
@@ -668,9 +669,9 @@
     <div class="section-head reveal"><div><div class="section-tag">// Connect</div><h2>Visit Us &amp; Follow Along</h2></div></div>
     <div class="contact-grid">
       <div class="reveal">
-        <div class="info-block"><span class="hud-label">Address</span><p>Shop No. 4, Vaishali Sector 4, Ghaziabad, Uttar Pradesh</p></div>
+        <div class="info-block"><span class="hud-label">Address</span><p>C5, Block C, Nandgram, Ghaziabad</p></div>
         <div class="info-block"><span class="hud-label">Hours</span><p class="dim">Everyday · 11:00 AM – 1:00 AM</p></div>
-        <div class="info-block"><span class="hud-label">Contact</span><p>+91 98765 43210</p><p class="dim">hello@gamepaycafe.in</p></div>
+        <div class="info-block"><span class="hud-label">Contact</span><p>+91 97162 61070</p><p class="dim">gamepaycafe@gmail.com</p></div>
       </div>
       <div class="reveal">
         <div class="social-grid">
@@ -813,15 +814,36 @@ function buildMarqueeItems(){
 }
 buildMarqueeItems(); buildMarqueeItems();
 
-/* ---------- VIDEOS (real auto-updating uploads playlist embed above; no fake data needed) ---------- */
-function copyLink(){ navigator.clipboard?.writeText(`https://www.youtube.com/@gamepaycafe`).then(()=>showToast('Channel link copied to clipboard!')); }
+/* ---------- VIDEOS (real channel videos) ---------- */
+const videos = [
+  { id:"sPm45Y7ZLv8", title:"GamePay Cafe Highlights", sub:"GamePay Cafe" },
+  { id:"8FuAjVnXF6w", title:"Gaming Session Recap", sub:"GamePay Cafe" },
+  { id:"A1RCriY3Xc8", title:"Tournament Moments", sub:"GamePay Cafe" },
+  { id:"4tmI68vC26w", title:"Cafe Vibes & Gameplay", sub:"GamePay Cafe" },
+  { id:"CqiifTexyoc", title:"Epic Clutch Plays", sub:"GamePay Cafe" },
+  { id:"RzihkZK4hLc", title:"GamePay Cafe Community", sub:"GamePay Cafe" },
+];
+const videoList = document.getElementById('videoList');
+videos.forEach(v=>{
+  const el = document.createElement('div'); el.className = 'video-thumb';
+  el.innerHTML = `<div class="thumb-box" style="background-image:url('https://img.youtube.com/vi/${v.id}/hqdefault.jpg')"></div><div><div class="thumb-title">${v.title}</div><div class="thumb-sub">${v.sub}</div></div>`;
+  el.onclick = () => {
+    document.getElementById('mainVideo').src = `https://www.youtube.com/embed/${v.id}?rel=0&autoplay=1`;
+    document.getElementById('mainVideoTitle').textContent = v.title;
+    updateShareLinks(v.id, v.title);
+  };
+  videoList.appendChild(el);
+});
+function updateShareLinks(id, title){ const url = `https://youtu.be/${id}`; document.getElementById('shareWA').href = `https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`; }
+function copyLink(){ navigator.clipboard?.writeText(`https://youtu.be/${videos[0].id}`).then(()=>showToast('Link copied to clipboard!')); }
+updateShareLinks(videos[0].id, videos[0].title);
 
 /* ---------- GAME VAULT ---------- */
 const vaultGames = [
-  { id:"dQw4w9WgXcQ", title:"Valorant", desc:"Tactical 5v5 shooter — precise gunplay meets agent abilities.", tags:["FPS","Tactical","5v5"] },
-  { id:"dQw4w9WgXcQ", title:"Tekken 8", desc:"The legendary fighting franchise with deep story mode.", tags:["Fighting","1v1","Story"] },
-  { id:"dQw4w9WgXcQ", title:"EA FC 24", desc:"The definitive football sim — Ultimate Team or Clubs.", tags:["Sports","1v1","Career"] },
-  { id:"dQw4w9WgXcQ", title:"COD: Warzone", desc:"Battle royale mayhem — drop in, loot up, survive.", tags:["Battle Royale","Squad","FPS"] },
+  { id:"sPm45Y7ZLv8", title:"Valorant", desc:"Tactical 5v5 shooter — precise gunplay meets agent abilities.", tags:["FPS","Tactical","5v5"] },
+  { id:"8FuAjVnXF6w", title:"Tekken 8", desc:"The legendary fighting franchise with deep story mode.", tags:["Fighting","1v1","Story"] },
+  { id:"A1RCriY3Xc8", title:"EA FC 24", desc:"The definitive football sim — Ultimate Team or Clubs.", tags:["Sports","1v1","Career"] },
+  { id:"4tmI68vC26w", title:"COD: Warzone", desc:"Battle royale mayhem — drop in, loot up, survive.", tags:["Battle Royale","Squad","FPS"] },
 ];
 const vaultGrid = document.getElementById('vaultGrid');
 vaultGames.forEach(g=>{
