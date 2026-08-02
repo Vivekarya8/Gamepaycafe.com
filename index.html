@@ -266,13 +266,19 @@
   .dl-btn{ background:var(--copper); color:var(--ink); border:none; border-radius:7px; padding:5px 9px; font-size:0.68rem; font-weight:700; }
 
   /* ---------- MINI GAME ---------- */
-  .game-panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; display:grid; grid-template-columns:1fr 220px; gap:20px; align-items:center; }
-  #reactionBox{ width:100%; height:190px; border-radius:10px; background:var(--surface-hi); display:flex; align-items:center; justify-content:center; font-family:'JetBrains Mono', monospace; font-size:1.05rem; font-weight:700; color:var(--text-dim); cursor:pointer; user-select:none; transition:background .15s ease; border:1px solid var(--line); }
-  #reactionBox.wait{ background:var(--magenta-dim); color:var(--magenta); }
-  #reactionBox.go{ background:var(--cyan-dim); color:var(--cyan); }
-  .game-stats div{ margin-bottom:12px; }
-  .game-stats .hud-label{ display:block; margin-bottom:3px; }
-  .game-stats .hud-value{ font-size:1.2rem; }
+  .runner-wrap{ position:relative; width:100%; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
+  .runner-hud{ display:flex; align-items:center; gap:28px; padding:14px 20px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .runner-hud .hud-value{ font-size:1.15rem; }
+  .runner-hint{ margin-left:auto; font-family:'JetBrains Mono', monospace; font-size:0.72rem; color:var(--text-dim); }
+  #runnerCanvas{ width:100%; height:320px; display:block; touch-action:none; background:linear-gradient(to bottom, #10131a 0%, #15171F 70%, #1b1e26 100%); }
+  .runner-overlay{ position:absolute; inset:0; top:57px; background:rgba(10,11,14,0.82); backdrop-filter:blur(2px); display:flex; align-items:center; justify-content:center; text-align:center; padding:20px; }
+  .runner-overlay-inner{ max-width:420px; }
+  .runner-overlay-inner h3{ font-size:1.4rem; margin-bottom:10px; color:var(--cyan); }
+  .runner-overlay-inner p{ color:var(--text-dim); font-size:0.88rem; margin-bottom:18px; }
+  .runner-controls-mobile{ display:none; gap:10px; padding:12px; border-top:1px solid var(--line); }
+  .runner-btn{ flex:1; padding:14px; border-radius:9px; background:var(--surface-hi); border:1px solid var(--line); color:var(--text); font-weight:700; font-size:0.9rem; }
+  .runner-btn:active{ background:var(--cyan-dim); border-color:var(--cyan); color:var(--cyan); }
+  @media (max-width:760px){ .runner-controls-mobile{ display:flex; } .runner-hint{ display:none; } }
 
   /* ---------- BOOKING ---------- */
   .booking-panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px; max-width:640px; }
@@ -401,7 +407,7 @@
     .video-grid{ grid-template-columns:1fr; }
     .vault-grid{ grid-template-columns:1fr; }
     .wall-grid{ grid-template-columns:repeat(2,1fr); }
-    .game-panel{ grid-template-columns:1fr; }
+    .runner-hud{ gap:14px; }
     .form-grid{ grid-template-columns:1fr; }
     .booth-panel{ grid-template-columns:1fr; }
     .member-panel{ grid-template-columns:1fr; }
@@ -621,12 +627,24 @@
     <div class="tab-panel" id="tab-gallery"><div class="wall-grid" id="wallGrid"></div></div>
 
     <div class="tab-panel" id="tab-play">
-      <div class="game-panel">
-        <div id="reactionBox">Click to start</div>
-        <div class="game-stats">
-          <div><span class="hud-label">Last Reaction</span><div class="hud-value" id="lastReact">--- ms</div></div>
-          <div><span class="hud-label">Best Reaction</span><div class="hud-value warm" id="bestReact">--- ms</div></div>
-          <div><span class="hud-label">Attempts</span><div class="hud-value" id="attemptCount">0</div></div>
+      <div class="runner-wrap" id="runnerWrap">
+        <div class="runner-hud">
+          <div><span class="hud-label">Score</span><div class="hud-value" id="runnerScore">0</div></div>
+          <div><span class="hud-label">Best</span><div class="hud-value warm" id="runnerBest">0</div></div>
+          <div><span class="hud-label">Speed</span><div class="hud-value" id="runnerSpeedVal">1.0x</div></div>
+          <div class="runner-hint">SPACE / TAP = Jump &nbsp;·&nbsp; ↓ / Hold = Duck</div>
+        </div>
+        <canvas id="runnerCanvas"></canvas>
+        <div class="runner-overlay" id="runnerOverlay">
+          <div class="runner-overlay-inner">
+            <h3 id="runnerOverlayTitle">GAMEPAY RUNNER</h3>
+            <p id="runnerOverlayText">Dodge lag spikes, duck under flying pings, and keep your connection alive. Gets faster — and meaner — the longer you survive.</p>
+            <button class="btn-primary" onclick="startRunner()">Start Game</button>
+          </div>
+        </div>
+        <div class="runner-controls-mobile">
+          <button class="runner-btn" id="runnerJumpBtn">⬆ Jump</button>
+          <button class="runner-btn" id="runnerDuckBtn">⬇ Duck</button>
         </div>
       </div>
     </div>
@@ -1030,6 +1048,7 @@ document.querySelectorAll('.tab-bar').forEach(bar=>{
       const panel = document.getElementById(id);
       if(panel) panel.classList.toggle('active', id === btn.dataset.tab);
     });
+    if(btn.dataset.tab === 'tab-play' && window.resizeRunnerCanvas){ setTimeout(window.resizeRunnerCanvas, 20); }
   });
 });
 
@@ -1194,29 +1213,185 @@ wallThemes.forEach((theme)=>{
   wallGrid.appendChild(cardWrap);
 });
 
-/* ---------- REACTION MINI GAME ---------- */
-const box = document.getElementById('reactionBox');
-let gameState = 'idle', startTime = 0, timeoutId;
-let best = localStorage.getItem('gp_best_reaction');
-if(best) document.getElementById('bestReact').textContent = best + ' ms';
-let attempts = parseInt(localStorage.getItem('gp_attempts') || '0');
-document.getElementById('attemptCount').textContent = attempts;
-box.addEventListener('click', ()=>{
-  if(gameState === 'idle'){
-    gameState = 'waiting'; box.textContent = 'Wait for it...'; box.className='wait';
-    const delay = 1000 + Math.random()*2500;
-    timeoutId = setTimeout(()=>{ gameState = 'go'; box.textContent = 'CLICK NOW!'; box.className='go'; startTime = Date.now(); }, delay);
-  } else if(gameState === 'waiting'){
-    clearTimeout(timeoutId); box.textContent = 'Too soon! Click to retry'; box.className=''; gameState='idle';
-  } else if(gameState === 'go'){
-    const reaction = Date.now() - startTime;
-    document.getElementById('lastReact').textContent = reaction + ' ms';
-    attempts++; localStorage.setItem('gp_attempts', attempts);
-    document.getElementById('attemptCount').textContent = attempts;
-    if(!best || reaction < parseInt(best)){ best = reaction; localStorage.setItem('gp_best_reaction', best); document.getElementById('bestReact').textContent = best + ' ms'; showToast('New best reaction time! 🏆'); }
-    box.textContent = 'Click to try again'; box.className=''; gameState='idle';
+/* ---------- GAMEPAY RUNNER (endless runner, harder than the Chrome offline dino game) ---------- */
+(function(){
+  const wrap = document.getElementById('runnerWrap');
+  const canvas = document.getElementById('runnerCanvas');
+  const ctx = canvas.getContext('2d');
+  const overlay = document.getElementById('runnerOverlay');
+  const overlayTitle = document.getElementById('runnerOverlayTitle');
+  const overlayText = document.getElementById('runnerOverlayText');
+  const scoreEl = document.getElementById('runnerScore');
+  const bestEl = document.getElementById('runnerBest');
+  const speedEl = document.getElementById('runnerSpeedVal');
+  const jumpBtn = document.getElementById('runnerJumpBtn');
+  const duckBtn = document.getElementById('runnerDuckBtn');
+
+  let dpr = window.devicePixelRatio || 1;
+  let W = 0, H = 320;
+  const GROUND_Y_RATIO = 0.78;
+
+  function resizeCanvas(){
+    W = wrap.clientWidth;
+    canvas.width = W * dpr; canvas.height = H * dpr;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
   }
-});
+  window.addEventListener('resize', resizeCanvas);
+  window.resizeRunnerCanvas = resizeCanvas;
+  resizeCanvas();
+
+  let best = parseInt(localStorage.getItem('gp_runner_best') || '0');
+  bestEl.textContent = best;
+
+  const player = { x: 60, w: 34, h: 44, y: 0, vy: 0, ducking:false, grounded:true };
+  let groundY, obstacles, score, speed, spawnTimer, spawnGap, running, animId, elapsed, comboSafe;
+
+  function resetState(){
+    groundY = H*GROUND_Y_RATIO;
+    player.y = groundY - player.h; player.vy = 0; player.ducking = false; player.grounded = true;
+    obstacles = [];
+    score = 0; speed = 6; spawnTimer = 0; spawnGap = 95; running = false; elapsed = 0;
+  }
+  resetState();
+
+  const GRAVITY = 0.85;
+  const JUMP_VELOCITY = -15;
+  const DUCK_H = 24;
+
+  function doJump(){
+    if(!running) return;
+    if(player.grounded && !player.ducking){
+      player.vy = JUMP_VELOCITY; player.grounded = false; soundClick();
+    }
+  }
+  function setDuck(state){
+    if(!running) return;
+    if(player.grounded){ player.ducking = state; }
+  }
+
+  window.addEventListener('keydown', (e)=>{
+    if(e.code === 'Space' || e.code === 'ArrowUp'){ e.preventDefault(); doJump(); }
+    if(e.code === 'ArrowDown'){ e.preventDefault(); setDuck(true); }
+  });
+  window.addEventListener('keyup', (e)=>{ if(e.code === 'ArrowDown') setDuck(false); });
+  canvas.addEventListener('pointerdown', doJump);
+  jumpBtn.addEventListener('click', doJump);
+  duckBtn.addEventListener('pointerdown', ()=>setDuck(true));
+  duckBtn.addEventListener('pointerup', ()=>setDuck(false));
+  duckBtn.addEventListener('pointerleave', ()=>setDuck(false));
+
+  function spawnObstacle(){
+    const roll = Math.random();
+    // as score climbs, flying "ping spike" obstacles (must duck) appear more often — harder than a plain dino jump-only game
+    const flyingChance = Math.min(0.15 + score/4000, 0.42);
+    if(roll < flyingChance){
+      obstacles.push({ type:'fly', x: W+20, w: 34, h: 22, y: groundY - player.h - 6 });
+    } else if(roll < flyingChance + 0.22 && score > 300){
+      // double obstacle — needs precise jump timing, ramps difficulty further
+      obstacles.push({ type:'ground', x: W+20, w: 22, h: 34 + Math.random()*14 });
+      obstacles.push({ type:'ground', x: W+20+46, w: 22, h: 34 + Math.random()*14 });
+    } else {
+      obstacles.push({ type:'ground', x: W+20, w: 24, h: 32 + Math.random()*22 });
+    }
+  }
+
+  function rectsOverlap(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+
+  function update(){
+    elapsed++;
+    score += speed*0.12;
+    // difficulty ramp: gets faster and spawns more aggressively the longer you survive
+    speed = 6 + Math.min(score/90, 11);
+    spawnGap = Math.max(38, 95 - score/22);
+    speedEl.textContent = (speed/6).toFixed(1) + 'x';
+    scoreEl.textContent = Math.floor(score);
+
+    // physics
+    if(!player.grounded){
+      player.vy += GRAVITY; player.y += player.vy;
+      if(player.y >= groundY - player.h){ player.y = groundY - player.h; player.vy = 0; player.grounded = true; }
+    }
+    const curH = player.ducking ? DUCK_H : player.h;
+    const curY = player.ducking ? groundY - DUCK_H : player.y;
+    const playerBox = { x: player.x, y: curY, w: player.w, h: curH };
+
+    spawnTimer++;
+    if(spawnTimer > spawnGap){ spawnTimer = 0; spawnObstacle(); }
+
+    for(let i=obstacles.length-1;i>=0;i--){
+      const o = obstacles[i];
+      o.x -= speed;
+      const oy = o.type === 'fly' ? o.y : groundY - o.h;
+      const obox = { x:o.x, y:oy, w:o.w, h:o.h };
+      if(rectsOverlap(playerBox, obox)){ endRunner(); return; }
+      if(o.x + o.w < -10) obstacles.splice(i,1);
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    // ground line
+    ctx.strokeStyle = 'rgba(242,239,233,0.18)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, groundY); ctx.lineTo(W, groundY); ctx.stroke();
+    // scrolling ground ticks for speed feel
+    ctx.fillStyle = 'rgba(242,239,233,0.08)';
+    const tickSpacing = 40;
+    const offset = (elapsed*speed) % tickSpacing;
+    for(let x = -offset; x < W; x += tickSpacing){ ctx.fillRect(x, groundY+4, 18, 2); }
+
+    // player
+    const curH = player.ducking ? DUCK_H : player.h;
+    const curY = player.ducking ? groundY - DUCK_H : player.y;
+    ctx.fillStyle = '#4DE8D1';
+    ctx.shadowColor = 'rgba(77,232,209,0.6)'; ctx.shadowBlur = 10;
+    ctx.fillRect(player.x, curY, player.w, curH);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#0A0B0E';
+    ctx.font = 'bold 16px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('🎮', player.x + player.w/2, curY + curH/2 + 6);
+
+    // obstacles
+    obstacles.forEach(o=>{
+      const oy = o.type === 'fly' ? o.y : groundY - o.h;
+      ctx.fillStyle = o.type === 'fly' ? '#FF4D6A' : '#E8A33D';
+      ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8;
+      ctx.fillRect(o.x, oy, o.w, o.h);
+      ctx.shadowBlur = 0;
+    });
+  }
+
+  function loop(){
+    if(!running) return;
+    update();
+    draw();
+    animId = requestAnimationFrame(loop);
+  }
+
+  function startRunner(){
+    resetState();
+    running = true;
+    overlay.style.display = 'none';
+    loop();
+  }
+  window.startRunner = startRunner;
+
+  function endRunner(){
+    running = false;
+    cancelAnimationFrame(animId);
+    const finalScore = Math.floor(score);
+    let newBest = false;
+    if(finalScore > best){ best = finalScore; localStorage.setItem('gp_runner_best', best); bestEl.textContent = best; newBest = true; }
+    overlayTitle.textContent = newBest ? '🏆 NEW BEST SCORE!' : 'CONNECTION LOST';
+    overlayText.textContent = `You survived to a score of ${finalScore}. ${newBest ? 'You just beat your old record!' : 'Best so far: ' + best + '.'}`;
+    overlay.querySelector('button').textContent = 'Play Again';
+    overlay.style.display = 'flex';
+    if(newBest){ soundWin(); fireConfetti(); } else { playTone([200,140],0.14,'sawtooth',0.07); }
+  }
+
+  draw();
+})();
+
 
 /* ---------- BOOKING FLOW ---------- */
 function goStep(n){
