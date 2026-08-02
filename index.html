@@ -139,6 +139,12 @@
   .btn-primary{ background:var(--copper); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease; }
   .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--copper-dim); }
   .btn-cyan{ background:var(--cyan); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease;}
+  /* ---------- MINI GAME ---------- */
+  .game-section{ padding:44px 0 52px; border-bottom:1px solid var(--line); background:radial-gradient(ellipse at top, rgba(77,232,209,0.06), transparent 60%); }
+  .game-wrap{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px; }
+  #dashCanvas{ width:100%; max-width:800px; height:auto; aspect-ratio:800/260; display:block; margin:0 auto; background:linear-gradient(#0d1a17,#050706); border-radius:10px; touch-action:none; cursor:pointer; }
+  .game-hud{ display:flex; align-items:center; justify-content:center; gap:22px; margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:0.88rem; flex-wrap:wrap; }
+  .game-hud .hud-num{ color:var(--cyan); font-weight:700; }
   .google-btn{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; background:#fff; color:#1f1f1f; }
   .google-btn:hover{ background:#f2f2f2; }
   .btn-cyan:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--cyan-dim); }
@@ -494,6 +500,20 @@
 </div>
 
 <div class="marquee-wrap"><div class="marquee-track" id="marqueeTrack"></div></div>
+
+<section class="game-section" id="minigame">
+  <div class="wrap">
+    <div class="section-head reveal"><div><h2>GamePay Dash — Play While You Scroll 🎮</h2><p>Tap the screen, click, or press Space to jump. Dodge the obstacles, grab the coins!</p></div></div>
+    <div class="game-wrap reveal">
+      <canvas id="dashCanvas" width="800" height="260"></canvas>
+      <div class="game-hud">
+        <div>Score: <span class="hud-num" id="dashScore">0</span></div>
+        <div>Best: <span class="hud-num" id="dashBest">0</span></div>
+        <button class="btn-cyan" id="dashStartBtn">Start Game</button>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- MENU (tabbed: Setup / Cafe / Combos) -->
 <section id="menu">
@@ -857,6 +877,131 @@
 </script>
 
 <script>
+/* ---------- MINI GAME: GamePay Dash (canvas endless runner w/ sound) ---------- */
+(function(){
+  const canvas = document.getElementById('dashCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const groundY = H - 40;
+
+  let audioCtx = null;
+  function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } else if(audioCtx.state === 'suspended'){ audioCtx.resume(); } }
+  function beep(freq, dur, type, vol){
+    if(!audioCtx) return;
+    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+    osc.type = type || 'square'; osc.frequency.value = freq; gain.gain.value = vol || 0.15;
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    osc.stop(audioCtx.currentTime + dur);
+  }
+  function soundJump(){ beep(520, 0.12, 'square', 0.12); }
+  function soundCoin(){ beep(880, 0.08, 'sine', 0.15); setTimeout(()=>beep(1180,0.08,'sine',0.12), 60); }
+  function soundHit(){ beep(120, 0.35, 'sawtooth', 0.18); }
+
+  let player, obstacles, coins, score, best, speed, spawnTimer, coinTimer, state, lastTime;
+  best = parseInt(localStorage.getItem('dash_best') || '0', 10);
+  document.getElementById('dashBest').textContent = best;
+
+  function resetGame(){
+    player = { x:60, y:groundY-34, w:28, h:34, vy:0, onGround:true };
+    obstacles = []; coins = [];
+    score = 0; speed = 300; spawnTimer = 0.6; coinTimer = 1.2;
+    state = 'running';
+    document.getElementById('dashScore').textContent = '0';
+    document.getElementById('dashStartBtn').textContent = 'Restart';
+  }
+
+  function jump(){
+    ensureAudio();
+    if(state === 'idle' || state === 'gameover'){ resetGame(); return; }
+    if(state === 'running' && player.onGround){ player.vy = -560; player.onGround = false; soundJump(); }
+  }
+
+  canvas.addEventListener('click', jump);
+  canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); jump(); }, {passive:false});
+  window.addEventListener('keydown', (e)=>{
+    if(e.code === 'Space' || e.code === 'ArrowUp'){
+      const rect = canvas.getBoundingClientRect();
+      if(rect.top < window.innerHeight && rect.bottom > 0){ e.preventDefault(); jump(); }
+    }
+  });
+  document.getElementById('dashStartBtn').addEventListener('click', ()=>{ ensureAudio(); resetGame(); });
+
+  function spawnObstacle(){ const h = 24 + Math.random()*22; obstacles.push({ x: W+20, y: groundY-h, w: 20+Math.random()*10, h }); }
+  function spawnCoin(){ const y = groundY - 60 - Math.random()*70; coins.push({ x: W+20, y, r:9, taken:false }); }
+
+  function drawGround(){
+    ctx.fillStyle = '#12211d'; ctx.fillRect(0, groundY, W, H-groundY);
+    ctx.strokeStyle = '#1d3a32'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
+  }
+  function drawPlayer(){
+    ctx.save(); ctx.translate(player.x, player.y);
+    ctx.fillStyle = '#4DE8D1'; ctx.fillRect(0,0,player.w,player.h*0.65);
+    ctx.fillStyle = '#E8A33D'; ctx.fillRect(4, player.h*0.65, player.w-8, player.h*0.35);
+    ctx.fillStyle = '#0A0B0E'; ctx.fillRect(player.w-11, 6, 5, 5);
+    ctx.restore();
+  }
+  function drawObstacles(){ ctx.fillStyle = '#FF4D6A'; obstacles.forEach(o=>ctx.fillRect(o.x, o.y, o.w, o.h)); }
+  function drawCoins(){ ctx.fillStyle = '#FFD54D'; coins.forEach(c=>{ if(!c.taken){ ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fill(); } }); }
+  function drawOverlay(text1, text2){
+    ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 22px monospace'; ctx.fillText(text1, W/2, H/2 - (text2?12:0));
+    if(text2){ ctx.font = '15px monospace'; ctx.fillStyle = '#ccc'; ctx.fillText(text2, W/2, H/2 + 18); }
+  }
+  function rectsOverlap(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
+
+  function loop(t){
+    if(!lastTime) lastTime = t;
+    const dt = Math.min((t-lastTime)/1000, 0.033);
+    lastTime = t;
+    ctx.clearRect(0,0,W,H);
+    drawGround();
+
+    if(state === 'running'){
+      speed += dt*6;
+      player.vy += 1500*dt; player.y += player.vy*dt;
+      if(player.y > groundY-player.h){ player.y = groundY-player.h; player.vy = 0; player.onGround = true; }
+
+      spawnTimer -= dt; coinTimer -= dt;
+      if(spawnTimer <= 0){ spawnObstacle(); spawnTimer = Math.max(0.7, 1.5 - speed/900); }
+      if(coinTimer <= 0){ spawnCoin(); coinTimer = 1.4 + Math.random()*1.2; }
+
+      obstacles.forEach(o=> o.x -= speed*dt);
+      coins.forEach(c=> c.x -= speed*dt);
+      obstacles = obstacles.filter(o=> o.x+o.w > -10);
+      coins = coins.filter(c=> c.x > -20 && !c.taken);
+
+      const pBox = { x:player.x, y:player.y, w:player.w, h:player.h };
+      for(const o of obstacles){
+        if(rectsOverlap(pBox, o)){
+          state = 'gameover'; soundHit();
+          if(score > best){ best = score; localStorage.setItem('dash_best', best); document.getElementById('dashBest').textContent = best; }
+          break;
+        }
+      }
+      for(const c of coins){
+        if(!c.taken && pBox.x < c.x+c.r && pBox.x+pBox.w > c.x-c.r && pBox.y < c.y+c.r && pBox.y+pBox.h > c.y-c.r){
+          c.taken = true; score += 10; soundCoin();
+        }
+      }
+      score += Math.round(dt*20);
+      document.getElementById('dashScore').textContent = score;
+    }
+
+    drawObstacles(); drawCoins(); drawPlayer();
+    if(state === 'idle') drawOverlay('Tap / Click / Space to Play');
+    if(state === 'gameover') drawOverlay('GAME OVER', 'Click / Tap / Space to try again');
+
+    requestAnimationFrame(loop);
+  }
+  state = 'idle';
+  requestAnimationFrame(loop);
+})();
+
 /* ---------- SCROLL REVEAL ---------- */
 const revealEls = document.querySelectorAll('.reveal');
 const io = new IntersectionObserver((entries) => { entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.1 });
