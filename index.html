@@ -293,6 +293,19 @@
   .plan-row{ display:flex; justify-content:space-between; align-items:center; background:var(--surface-hi); border-radius:8px; padding:10px 12px; }
   .plan-row .price{ font-family:'JetBrains Mono', monospace; font-weight:700; color:var(--copper); font-size:0.9rem; }
   .plan-row button{ padding:6px 12px; border-radius:7px; border:none; background:var(--cyan); color:var(--ink); font-weight:600; font-size:0.76rem; }
+
+  /* ---------- LOGIN MODAL / NAV AUTH ---------- */
+  .nav-login-btn{ border:1px solid var(--line); padding:8px 18px; border-radius:8px; font-size:0.82rem; font-weight:700; color:var(--text); background:transparent; text-transform:uppercase; letter-spacing:0.02em; transition:border-color .15s ease, color .15s ease; }
+  .nav-login-btn:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .nav-profile-chip{ display:flex; align-items:center; gap:8px; cursor:pointer; border:1px solid var(--line); padding:7px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; transition:border-color .15s ease; }
+  .nav-profile-chip:hover{ border-color:var(--cyan); }
+  .login-modal-overlay{ position:fixed; inset:0; background:rgba(6,7,10,0.7); backdrop-filter:blur(3px); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-modal{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px; width:100%; max-width:360px; position:relative; }
+  .login-modal h3{ margin-bottom:6px; font-size:1.1rem; }
+  .login-modal input{ width:100%; background:var(--surface-hi); border:1px solid var(--line); border-radius:7px; padding:11px; color:var(--text); font-size:0.9rem; margin-top:12px; }
+  .login-modal input:focus{ outline:none; border-color:var(--cyan); }
+  .login-modal-close{ position:absolute; top:14px; right:14px; background:none; border:none; color:var(--text-dim); font-size:1.2rem; cursor:pointer; line-height:1; }
+  .login-modal-close:hover{ color:var(--text); }
   .profile-row{ display:flex; align-items:center; justify-content:space-between; background:var(--surface-hi); border-radius:9px; padding:14px; margin-bottom:12px; }
 
   .booth-wrap{ margin-top:20px; }
@@ -330,6 +343,43 @@
   .social-card .handle{ font-weight:600; font-size:0.86rem; }
   .social-card .plat{ font-size:0.7rem; color:var(--text-dim); }
 
+  /* ---------- SPIN WHEEL ---------- */
+  .spin-panel{ display:flex; gap:40px; align-items:center; flex-wrap:wrap; justify-content:center; }
+  .wheel-wrap{ position:relative; width:360px; height:360px; flex-shrink:0; }
+  .wheel-pointer{ position:absolute; top:-6px; left:50%; transform:translateX(-50%); font-size:1.6rem; color:var(--copper); z-index:5; filter:drop-shadow(0 0 6px rgba(232,163,61,0.6)); }
+  .wheel{ width:360px; height:360px; border-radius:50%; border:4px solid var(--copper); box-shadow:0 0 40px rgba(232,163,61,0.25); transition: transform 4s cubic-bezier(0.15,0.85,0.25,1); }
+  .wheel canvas{ width:100%; height:100%; border-radius:50%; display:block; }
+  .spin-side{ display:flex; flex-direction:column; gap:14px; align-items:flex-start; min-width:220px; }
+  .spin-result{ font-family:'JetBrains Mono', monospace; font-size:1rem; color:var(--cyan); min-height:1.4em; font-weight:700; }
+
+  /* ---------- FAQ ---------- */
+  .faq-list{ display:flex; flex-direction:column; gap:10px; max-width:760px; }
+  .faq-item{ background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .faq-q{ padding:16px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:600; font-size:0.92rem; }
+  .faq-q:hover{ color:var(--cyan); }
+  .faq-q .chev{ transition:transform .2s ease; color:var(--text-dim); }
+  .faq-item.open .faq-q .chev{ transform:rotate(180deg); color:var(--cyan); }
+  .faq-a{ max-height:0; overflow:hidden; transition:max-height .25s ease; padding:0 18px; color:var(--text-dim); font-size:0.86rem; }
+  .faq-item.open .faq-a{ max-height:200px; padding:0 18px 16px; }
+
+  /* ---------- MAP ---------- */
+  .map-embed{ border-radius:10px; overflow:hidden; border:1px solid var(--line); margin-top:8px; }
+  .map-embed iframe{ width:100%; height:220px; border:0; display:block; filter:grayscale(0.2) invert(0.92) contrast(0.9); }
+
+  /* ---------- CHAT WIDGET ---------- */
+  .chat-fab{ position:fixed; bottom:20px; left:20px; z-index:998; width:56px; height:56px; border-radius:50%; background:var(--copper); color:var(--ink); display:flex; align-items:center; justify-content:center; font-size:1.5rem; border:none; box-shadow:0 8px 24px rgba(232,163,61,0.4); transition:transform .2s ease; }
+  .chat-fab:hover{ transform:scale(1.08); }
+  .chat-panel{ position:fixed; bottom:88px; left:20px; z-index:998; width:300px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; display:none; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+  .chat-panel.open{ display:block; }
+  .chat-panel h4{ font-size:0.95rem; margin-bottom:10px; }
+  .chat-panel .form-stack{ margin-top:10px; }
+  .chat-panel input, .chat-panel textarea{ background:var(--surface-hi); border:1px solid var(--line); border-radius:7px; padding:9px 10px; color:var(--text); font-size:0.84rem; font-family:inherit; width:100%; }
+  .chat-panel textarea{ resize:vertical; min-height:60px; }
+  .chat-wa-btn{ display:block; text-align:center; background:#25D366; color:#0A0B0E; font-weight:700; padding:10px; border-radius:8px; font-size:0.86rem; margin-bottom:10px; }
+
+  /* ---------- CONFETTI CANVAS ---------- */
+  #confettiCanvas{ position:fixed; inset:0; pointer-events:none; z-index:1000; }
+
   footer{ padding:24px 0; }
   footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; }
   footer p{ font-size:0.78rem; color:var(--text-dim); }
@@ -349,6 +399,7 @@
     .member-panel{ grid-template-columns:1fr; }
     .review-panel{ grid-template-columns:1fr; }
     .contact-grid{ grid-template-columns:1fr; gap:28px; }
+    .spin-panel{ flex-direction:column; }
   }
   @media (max-width:520px){
     .station-grid{ grid-template-columns:1fr; }
@@ -356,6 +407,8 @@
     .social-grid{ grid-template-columns:1fr; }
     section{ padding:40px 0; }
     .hero{ padding:80px 0 20px; }
+    .wheel-wrap, .wheel{ width:280px; height:280px; }
+    .chat-panel{ width:calc(100vw - 40px); left:20px; }
   }
 </style>
 </head>
@@ -389,13 +442,29 @@
           <a onclick="gotoTab('media','tab-play')">⚡ Mini Game</a>
         </div>
       </div>
-      <a href="#booking">Book</a><a href="#membership">Membership</a><a href="#reviews">Reviews</a><a href="#contact">Contact</a>
+      <a href="#booking">Book</a><a href="#membership">Membership</a><a href="#spinwheel">Spin &amp; Win</a><a href="#reviews">Reviews</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </div>
     <div class="nav-right">
-      <div class="points-chip" id="navPoints">⚡ <span id="navPointsVal">0</span> pts</div>
+      <button class="nav-login-btn" id="navLoginBtn" onclick="openLoginModal()">Login</button>
+      <div class="nav-profile-chip" id="navProfileChip" style="display:none;" onclick="document.getElementById('membership').scrollIntoView({behavior:'smooth'})">
+        <span id="navProfileName">—</span>
+        <div class="points-chip" id="navPoints">⚡ <span id="navPointsVal">0</span></div>
+      </div>
     </div>
   </nav>
 </header>
+
+<!-- LOGIN MODAL -->
+<div class="login-modal-overlay" id="loginModalOverlay" style="display:none;" onclick="if(event.target===this) closeLoginModal()">
+  <div class="login-modal">
+    <button class="login-modal-close" onclick="closeLoginModal()">✕</button>
+    <h3>Log In</h3>
+    <p class="dim" style="font-size:.8rem;">Enter the phone number you signed up with.</p>
+    <input type="tel" id="loginPhone" placeholder="Phone number">
+    <button class="btn-cyan" style="width:100%;margin-top:14px;" onclick="loginUser()">Log In</button>
+    <p class="dim" style="font-size:.78rem;margin-top:16px;">New here? <a href="#membership" onclick="closeLoginModal()" style="color:var(--cyan); font-weight:600;">Create a GamePay ID</a></p>
+  </div>
+</div>
 
 <!-- COMPACT INFO STRIP -->
 <div class="top-info">
@@ -592,7 +661,7 @@
 <!-- MEMBERSHIP + PHOTO BOOTH -->
 <section id="membership">
   <div class="wrap">
-    <div class="section-head reveal"><div><div class="section-tag">// Membership</div><h2>Points, Login &amp; Photo Booth</h2><p>Local-browser demo — connect a backend to sync accounts.</p></div></div>
+    <div class="section-head reveal"><div><div class="section-tag">// Membership</div><h2>Points, Login &amp; Photo Booth</h2><p>Saved in this browser — sign up once, then log in anytime to pick up right where you left off.</p></div></div>
     <div class="member-panel reveal">
       <div class="member-box" id="loggedOutView">
         <h3>Create Your GamePay ID</h3>
@@ -605,7 +674,10 @@
       <div class="member-box" id="loggedInView" style="display:none;">
         <h3>Your Membership</h3>
         <div class="profile-row"><div><div style="font-weight:600;" id="memProfileName">—</div><div style="font-size:.74rem;color:var(--text-dim);">GamePay Member</div></div><div class="hud-value warm" id="memProfilePoints">0 pts</div></div>
-        <button class="btn-ghost" onclick="logOut()">Log Out</button>
+        <div style="display:flex; gap:10px; margin-top:6px;">
+          <button class="btn-ghost" onclick="logOut()" style="flex:1;">Log Out</button>
+          <button class="btn-ghost" onclick="openLoginModal()" style="flex:1;">Switch Account</button>
+        </div>
       </div>
       <div class="member-box">
         <h3>Buy More Points</h3>
@@ -644,6 +716,34 @@
   </div>
 </section>
 
+<!-- SPIN & WIN -->
+<section id="spinwheel">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Lucky Spin</div><h2>Spin &amp; Win a Discount</h2><p>One free spin per day — genuinely working, saved in this browser.</p></div></div>
+    <div class="spin-panel reveal">
+      <div class="wheel-wrap">
+        <div class="wheel-pointer">▼</div>
+        <div class="wheel" id="wheel">
+          <canvas id="wheelCanvas" width="360" height="360"></canvas>
+        </div>
+      </div>
+      <div class="spin-side">
+        <button class="btn-primary" id="spinBtn" onclick="spinWheel()">Spin the Wheel</button>
+        <div id="spinResult" class="spin-result"></div>
+        <div class="demo-note" id="spinNote">You get 1 free spin every 24 hours.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="section-head reveal"><div><div class="section-tag">// Good to Know</div><h2>Frequently Asked Questions</h2></div></div>
+    <div class="faq-list reveal" id="faqList"></div>
+  </div>
+</section>
+
 <!-- REVIEWS -->
 <section id="reviews">
   <div class="wrap">
@@ -672,6 +772,12 @@
         <div class="info-block"><span class="hud-label">Address</span><p>C5, Block C, Nandgram, Ghaziabad</p></div>
         <div class="info-block"><span class="hud-label">Hours</span><p class="dim">Everyday · 11:00 AM – 1:00 AM</p></div>
         <div class="info-block"><span class="hud-label">Contact</span><p>+91 97162 61070</p><p class="dim">gamepaycafe@gmail.com</p></div>
+        <div class="info-block">
+          <span class="hud-label">Find Us</span>
+          <div class="map-embed">
+            <iframe src="https://www.google.com/maps?q=C5,+Block+C,+Nandgram,+Ghaziabad,+Uttar+Pradesh&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+          </div>
+        </div>
       </div>
       <div class="reveal">
         <div class="social-grid">
@@ -690,6 +796,48 @@
 <footer><div class="wrap"><p>© 2026 GamePay Cafe. All rights reserved.</p><p>Insert coin to continue.</p></div></footer>
 
 <div class="toast" id="toast"></div>
+<canvas id="confettiCanvas"></canvas>
+
+<button class="chat-fab" onclick="toggleChat()">💬</button>
+<div class="chat-panel" id="chatPanel">
+  <h4>Need help?</h4>
+  <a class="chat-wa-btn" href="https://wa.me/919716261070" target="_blank" rel="noopener">🟢 Chat on WhatsApp (Instant)</a>
+  <div class="form-stack">
+    <input type="text" id="chatName" placeholder="Your name">
+    <textarea id="chatMsg" placeholder="Type your message..."></textarea>
+    <button class="btn-primary" onclick="sendChatMessage()">Send Message</button>
+  </div>
+  <div class="demo-note" style="margin-top:8px;">⚠ This form saves your message in this browser (offline demo) — for an instant reply, use WhatsApp above.</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+  import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-analytics.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD0qZuts52M9DC-3zhXwz3feNLjtWtLngU",
+    authDomain: "gamepay-cafe.firebaseapp.com",
+    projectId: "gamepay-cafe",
+    storageBucket: "gamepay-cafe.firebasestorage.app",
+    messagingSenderId: "890954890810",
+    appId: "1:890954890810:web:214765babdf2f1f0eb3f03",
+    measurementId: "G-YL3X7SJ3YP"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  isSupported().then(ok=>{ if(ok) getAnalytics(app); }).catch(()=>{});
+  const db = getFirestore(app);
+
+  window.fbGetMember = async function(phone){
+    const snap = await getDoc(doc(db, "members", phone));
+    return snap.exists() ? snap.data() : null;
+  };
+  window.fbSetMember = async function(phone, data){
+    await setDoc(doc(db, "members", phone), data);
+  };
+  window.dispatchEvent(new Event('firebase-ready'));
+</script>
 
 <script>
 /* ---------- SCROLL REVEAL ---------- */
@@ -926,42 +1074,83 @@ function confirmBooking(){
   const bookings = JSON.parse(localStorage.getItem('gp_bookings') || '[]');
   bookings.push({ name, phone, station: document.getElementById('bStation').value, date: document.getElementById('bDate').value, time: document.getElementById('bTime').value, ts: Date.now() });
   localStorage.setItem('gp_bookings', JSON.stringify(bookings));
+  soundSuccess(); fireConfetti();
   showToast(`Booking confirmed for ${name}! (Demo — no real charge made)`);
   goStep(1); document.getElementById('bName').value=''; document.getElementById('bPhone').value='';
 }
 
 /* ---------- MEMBERSHIP / POINTS ---------- */
-function refreshMemberUI(){
-  const member = JSON.parse(localStorage.getItem('gp_member') || 'null');
-  const navChip = document.getElementById('navPoints');
+/* ---------- MEMBERSHIP AUTH (Firebase Firestore — real cross-device accounts) ---------- */
+function waitForFirebase(){
+  return new Promise(resolve=>{
+    if(window.fbGetMember) return resolve();
+    window.addEventListener('firebase-ready', ()=>resolve(), {once:true});
+  });
+}
+async function getCurrentUser(){
+  const phone = localStorage.getItem('gp_current');
+  if(!phone) return null;
+  await waitForFirebase();
+  try{ const data = await window.fbGetMember(phone); return data ? { ...data, phone } : null; }
+  catch(err){ console.error('Firestore read failed', err); showToast('Connection issue — check your internet.'); return null; }
+}
+async function saveCurrentUser(member){
+  await waitForFirebase();
+  try{ await window.fbSetMember(member.phone, { name: member.name, points: member.points }); }
+  catch(err){ console.error('Firestore write failed', err); showToast('Could not save — check your internet.'); }
+}
+async function refreshMemberUI(){
+  const member = await getCurrentUser();
+  const loginBtn = document.getElementById('navLoginBtn');
+  const profileChip = document.getElementById('navProfileChip');
   if(member){
     document.getElementById('loggedOutView').style.display='none';
     document.getElementById('loggedInView').style.display='block';
     document.getElementById('memProfileName').textContent = member.name;
     document.getElementById('memProfilePoints').textContent = member.points + ' pts';
-    navChip.style.display='flex'; document.getElementById('navPointsVal').textContent = member.points;
+    loginBtn.style.display='none'; profileChip.style.display='flex';
+    document.getElementById('navProfileName').textContent = member.name.split(' ')[0];
+    document.getElementById('navPointsVal').textContent = member.points;
     document.getElementById('lockedBanner').textContent = `✅ Logged in as ${member.name} — Photo Booth costs 20 points per use.`;
   } else {
     document.getElementById('loggedOutView').style.display='block';
     document.getElementById('loggedInView').style.display='none';
-    navChip.style.display='none';
+    loginBtn.style.display='inline-block'; profileChip.style.display='none';
     document.getElementById('lockedBanner').textContent = `🔒 Costs 20 points per use. Sign up above to unlock.`;
   }
 }
-function signUp(){
+async function signUp(){
   const name = document.getElementById('memName').value.trim();
   const phone = document.getElementById('memPhone').value.trim();
   if(!name || !phone){ showToast('Enter a display name and phone number.'); return; }
-  localStorage.setItem('gp_member', JSON.stringify({ name, phone, points: 100 }));
+  await waitForFirebase();
+  let existing; try{ existing = await window.fbGetMember(phone); }catch(err){ showToast('Connection issue — check your internet.'); return; }
+  if(existing){ showToast('Account already exists — logging you in.'); localStorage.setItem('gp_current', phone); refreshMemberUI(); return; }
+  await saveCurrentUser({ phone, name, points: 100 });
+  localStorage.setItem('gp_current', phone);
+  soundWin(); fireConfetti();
   showToast(`Welcome ${name}! You got 100 points 🎉`); refreshMemberUI();
 }
-function logOut(){ localStorage.removeItem('gp_member'); showToast('Logged out.'); refreshMemberUI(); }
-function buyPoints(amount){
-  const member = JSON.parse(localStorage.getItem('gp_member') || 'null');
-  if(!member){ showToast('Sign up first to buy points.'); return; }
-  member.points += amount; localStorage.setItem('gp_member', JSON.stringify(member));
+async function loginUser(){
+  const phone = document.getElementById('loginPhone').value.trim();
+  if(!phone){ showToast('Enter your phone number.'); return; }
+  await waitForFirebase();
+  let existing; try{ existing = await window.fbGetMember(phone); }catch(err){ showToast('Connection issue — check your internet.'); return; }
+  if(!existing){ showToast('No account found with that number — sign up below.'); return; }
+  localStorage.setItem('gp_current', phone);
+  showToast(`Welcome back, ${existing.name}!`);
+  refreshMemberUI(); closeLoginModal();
+  document.getElementById('membership').scrollIntoView({behavior:'smooth'});
+}
+function logOut(){ localStorage.removeItem('gp_current'); showToast('Logged out. Your points are saved for next time.'); refreshMemberUI(); }
+async function buyPoints(amount){
+  const member = await getCurrentUser();
+  if(!member){ showToast('Sign up or log in first to buy points.'); openLoginModal(); return; }
+  member.points += amount; await saveCurrentUser(member);
   showToast(`+${amount} points added (demo purchase, no real charge).`); refreshMemberUI();
 }
+function openLoginModal(){ document.getElementById('loginModalOverlay').style.display='flex'; document.getElementById('loginPhone').value=''; document.getElementById('loginPhone').focus(); }
+function closeLoginModal(){ document.getElementById('loginModalOverlay').style.display='none'; }
 refreshMemberUI();
 
 /* ---------- PHOTO BOOTH ---------- */
@@ -979,15 +1168,15 @@ document.querySelectorAll('.frame-chip').forEach(chip=>{
     if(boothImage) renderBooth(true);
   });
 });
-function renderBooth(skipCharge){
+async function renderBooth(skipCharge){
   const canvas = document.getElementById('boothCanvas'); const ctx = canvas.getContext('2d');
   ctx.clearRect(0,0,440,440);
   if(!boothImage){ showToast('Upload a photo first.'); return; }
   if(!skipCharge){
-    const member = JSON.parse(localStorage.getItem('gp_member') || 'null');
-    if(!member){ showToast('Sign up and log in to use the Photo Booth.'); return; }
+    const member = await getCurrentUser();
+    if(!member){ showToast('Sign up and log in to use the Photo Booth.'); openLoginModal(); return; }
     if(member.points < 20){ showToast('Not enough points — buy more below.'); return; }
-    member.points -= 20; localStorage.setItem('gp_member', JSON.stringify(member));
+    member.points -= 20; await saveCurrentUser(member);
     refreshMemberUI(); showToast('20 points used — generating your image!');
   }
   const colors = { cyan:"#4DE8D1", copper:"#E8A33D", magenta:"#FF4D6A" };
@@ -1033,9 +1222,189 @@ function submitReview(){
   const reviews = loadReviews(); reviews.push({ name, stars: selectedStars, text });
   localStorage.setItem('gp_reviews', JSON.stringify(reviews));
   document.getElementById('revName').value=''; document.getElementById('revText').value='';
+  soundSuccess();
   showToast('Thanks for your review!'); renderReviews();
 }
 renderReviews();
+
+/* ---------- SOUND EFFECTS (Web Audio API, no external files) ---------- */
+let audioCtx;
+function playTone(freqs, duration=0.12, type='sine', gain=0.08){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f, i)=>{
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = type; osc.frequency.value = f;
+      g.gain.value = gain;
+      osc.connect(g); g.connect(audioCtx.destination);
+      const start = audioCtx.currentTime + i*duration;
+      osc.start(start);
+      g.gain.setValueAtTime(gain, start);
+      g.gain.exponentialRampToValueAtTime(0.001, start + duration);
+      osc.stop(start + duration + 0.02);
+    });
+  }catch(e){ /* audio not available, fail silently */ }
+}
+function soundSuccess(){ playTone([523.25, 659.25, 783.99], 0.11, 'triangle', 0.09); }
+function soundClick(){ playTone([300], 0.05, 'square', 0.05); }
+function soundWin(){ playTone([392, 523.25, 659.25, 783.99, 987.77], 0.1, 'triangle', 0.09); }
+
+/* ---------- CONFETTI ---------- */
+const confettiCanvas = document.getElementById('confettiCanvas');
+const cctx = confettiCanvas.getContext('2d');
+function resizeConfetti(){ confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+resizeConfetti(); window.addEventListener('resize', resizeConfetti);
+function fireConfetti(){
+  const colors = ['#4DE8D1','#E8A33D','#FF4D6A','#F2EFE9'];
+  const particles = [];
+  for(let i=0;i<120;i++){
+    particles.push({
+      x: confettiCanvas.width/2 + (Math.random()-0.5)*200,
+      y: confettiCanvas.height*0.25,
+      vx: (Math.random()-0.5)*10,
+      vy: Math.random()*-8 - 4,
+      size: Math.random()*7+4,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rot: Math.random()*360,
+      vrot: (Math.random()-0.5)*12,
+      life: 0
+    });
+  }
+  let frame = 0;
+  function animate(){
+    cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+    frame++;
+    let alive = false;
+    particles.forEach(p=>{
+      p.vy += 0.25; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.life++;
+      if(p.y < confettiCanvas.height + 20){ alive = true; }
+      cctx.save();
+      cctx.translate(p.x, p.y); cctx.rotate(p.rot * Math.PI/180);
+      cctx.fillStyle = p.color;
+      cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+      cctx.restore();
+    });
+    if(alive && frame < 200) requestAnimationFrame(animate);
+    else cctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+  }
+  animate();
+}
+
+/* ---------- SPIN & WIN WHEEL ---------- */
+const wheelPrizes = [
+  { label:"10% OFF", color:"#4DE8D1" },
+  { label:"Free Coffee", color:"#E8A33D" },
+  { label:"5% OFF", color:"#20242F" },
+  { label:"Try Again", color:"#181B23" },
+  { label:"20% OFF", color:"#FF4D6A" },
+  { label:"Free Snack", color:"#4DE8D1" },
+  { label:"15% OFF", color:"#E8A33D" },
+  { label:"Try Again", color:"#181B23" },
+];
+function drawWheel(){
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const cx = 180, cy = 180, r = 175;
+  const seg = (Math.PI*2) / wheelPrizes.length;
+  wheelPrizes.forEach((p, i)=>{
+    const start = i*seg, end = start+seg;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,end); ctx.closePath();
+    ctx.fillStyle = p.color; ctx.fill();
+    ctx.strokeStyle = 'rgba(242,239,233,0.15)'; ctx.stroke();
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(start+seg/2);
+    ctx.textAlign = 'right'; ctx.fillStyle = '#F2EFE9';
+    ctx.font = 'bold 15px Space Grotesk, sans-serif';
+    ctx.fillText(p.label, r-16, 6);
+    ctx.restore();
+  });
+}
+drawWheel();
+let wheelSpinning = false;
+function canSpinToday(){
+  const last = localStorage.getItem('gp_last_spin');
+  if(!last) return true;
+  return (Date.now() - parseInt(last)) > 24*60*60*1000;
+}
+function updateSpinNote(){
+  const note = document.getElementById('spinNote');
+  if(canSpinToday()){ note.textContent = "You get 1 free spin every 24 hours."; }
+  else{
+    const last = parseInt(localStorage.getItem('gp_last_spin'));
+    const hrsLeft = Math.ceil((24*60*60*1000 - (Date.now()-last)) / (60*60*1000));
+    note.textContent = `Come back in ~${hrsLeft} hour(s) for your next spin.`;
+  }
+}
+updateSpinNote();
+function spinWheel(){
+  if(wheelSpinning) return;
+  if(!canSpinToday()){ showToast("You've already used today's spin — come back tomorrow!"); return; }
+  wheelSpinning = true;
+  const wheel = document.getElementById('wheel');
+  const segCount = wheelPrizes.length;
+  const segAngle = 360/segCount;
+  const winIndex = Math.floor(Math.random()*segCount);
+  const targetRotation = 360*6 + (360 - (winIndex*segAngle + segAngle/2));
+  wheel.style.transition = 'transform 4s cubic-bezier(0.15,0.85,0.25,1)';
+  wheel.style.transform = `rotate(${targetRotation}deg)`;
+  soundClick();
+  document.getElementById('spinResult').textContent = '';
+  setTimeout(()=>{
+    const prize = wheelPrizes[winIndex];
+    localStorage.setItem('gp_last_spin', Date.now());
+    wheelSpinning = false;
+    updateSpinNote();
+    if(prize.label === 'Try Again'){
+      document.getElementById('spinResult').textContent = "So close! Try again tomorrow.";
+      showToast("No luck this time — come back tomorrow!");
+    } else {
+      const code = 'GPC-' + Math.random().toString(36).substring(2,7).toUpperCase();
+      document.getElementById('spinResult').innerHTML = `🎉 You won: ${prize.label}<br>Code: ${code}`;
+      const wins = JSON.parse(localStorage.getItem('gp_wheel_wins') || '[]');
+      wins.push({ prize: prize.label, code, ts: Date.now() });
+      localStorage.setItem('gp_wheel_wins', JSON.stringify(wins));
+      soundWin(); fireConfetti();
+      showToast(`You won ${prize.label}! Show code ${code} at the counter.`);
+    }
+  }, 4100);
+}
+
+/* ---------- FAQ ---------- */
+const faqData = [
+  { q:"Do I need to book in advance, or can I walk in?", a:"Walk-ins are always welcome, but booking a slot guarantees your station during busy hours (evenings and weekends)." },
+  { q:"How do I join a tournament?", a:"Check the Tournaments section for the schedule, then register at the counter or through our Discord before the entry deadline." },
+  { q:"Can I cancel or reschedule a booking?", a:"Yes — just message us on WhatsApp or call the cafe at least 2 hours before your slot." },
+  { q:"Do membership points expire?", a:"Points stay valid for 6 months from the date they were earned." },
+  { q:"Is outside food allowed?", a:"We'd love for you to try our menu, but small snacks for personal dietary needs are fine — just check with our staff." },
+];
+const faqList = document.getElementById('faqList');
+faqData.forEach((item, i)=>{
+  const el = document.createElement('div');
+  el.className = 'faq-item';
+  el.innerHTML = `<div class="faq-q"><span>${item.q}</span><span class="chev">▾</span></div><div class="faq-a">${item.a}</div>`;
+  el.querySelector('.faq-q').addEventListener('click', ()=>{
+    el.classList.toggle('open');
+  });
+  faqList.appendChild(el);
+});
+
+/* ---------- CHAT WIDGET ---------- */
+function toggleChat(){
+  document.getElementById('chatPanel').classList.toggle('open');
+}
+function sendChatMessage(){
+  const name = document.getElementById('chatName').value.trim();
+  const msg = document.getElementById('chatMsg').value.trim();
+  if(!name || !msg){ showToast('Please enter your name and a message.'); return; }
+  const messages = JSON.parse(localStorage.getItem('gp_chat_messages') || '[]');
+  messages.push({ name, msg, ts: Date.now() });
+  localStorage.setItem('gp_chat_messages', JSON.stringify(messages));
+  showToast("Message saved! We'll get back to you soon — or chat on WhatsApp for an instant reply.");
+  document.getElementById('chatName').value=''; document.getElementById('chatMsg').value='';
+  toggleChat();
+}
 </script>
 
 <script>
