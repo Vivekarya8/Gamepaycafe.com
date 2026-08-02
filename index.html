@@ -999,6 +999,8 @@
     requestAnimationFrame(loop);
   }
   state = 'idle';
+  player = { x:60, y:groundY-34, w:28, h:34, vy:0, onGround:true };
+  obstacles = []; coins = []; score = 0;
   requestAnimationFrame(loop);
 })();
 
