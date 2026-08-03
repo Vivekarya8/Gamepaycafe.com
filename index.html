@@ -3,10 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GamePay Cafe — Gaming Lounge &amp; Cafe</title>
+<title>GamePay Cafe — Gaming Lounge &amp; Cafe in Ghaziabad | Nandgram</title>
+<meta name="description" content="GamePay Cafe is a premium gaming lounge & cafe in Nandgram, Ghaziabad. PS5, high-end PC gaming stations, tournaments, snacks & drinks. Open daily 11 AM – 1 AM. Book your station now.">
+<meta name="keywords" content="gaming cafe Ghaziabad, gaming lounge Nandgram, PS5 gaming cafe, PC gaming cafe Ghaziabad, esports tournaments Ghaziabad, GamePay Cafe">
+<meta name="robots" content="index, follow">
+<meta name="author" content="GamePay Cafe">
+<meta name="theme-color" content="#4DE8D1">
+<link rel="canonical" href="https://gamepaycafe.online/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="business.business">
+<meta property="og:site_name" content="GamePay Cafe">
+<meta property="og:title" content="GamePay Cafe — Gaming Lounge & Cafe in Ghaziabad">
+<meta property="og:description" content="Premium PS5 & PC gaming stations, tournaments, and cafe vibes in Nandgram, Ghaziabad. Open daily 11 AM – 1 AM.">
+<meta property="og:url" content="https://gamepaycafe.online/">
+<meta property="og:image" content="https://gamepaycafe.online/og-image.jpg">
+<meta property="og:locale" content="en_IN">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GamePay Cafe — Gaming Lounge & Cafe in Ghaziabad">
+<meta name="twitter:description" content="Premium PS5 & PC gaming stations, tournaments, and cafe vibes in Nandgram, Ghaziabad. Open daily 11 AM – 1 AM.">
+<meta name="twitter:image" content="https://gamepaycafe.online/og-image.jpg">
+
+<!-- Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "InternetCafe",
+  "name": "GamePay Cafe",
+  "url": "https://gamepaycafe.online/",
+  "telephone": "+91-97162-61070",
+  "email": "gamepaycafe@gmail.com",
+  "priceRange": "₹₹",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "C5, Block C, Nandgram",
+    "addressLocality": "Ghaziabad",
+    "addressRegion": "Uttar Pradesh",
+    "addressCountry": "IN"
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "11:00",
+    "closes": "01:00"
+  },
+  "sameAs": [
+    "https://www.instagram.com/gamepay.cafe",
+    "https://www.youtube.com/@gamepaycafe",
+    "https://www.facebook.com/share/1HY6kg5oe3/",
+    "https://x.com/Gamepaycafe",
+    "https://www.threads.com/@gamepaycafe",
+    "https://t.me/Gamepaycafe"
+  ]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+  .sr-only{ position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
   :root{
     --ink:#0A0B0E;
     --surface:#15171F;
@@ -140,7 +197,7 @@
   .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--copper-dim); }
   .btn-cyan{ background:var(--cyan); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease;}
   /* ---------- MINI GAME HUB ---------- */
-  .game-section{ padding:44px 0 52px; border-bottom:1px solid var(--line); background:radial-gradient(ellipse at top, rgba(77,232,209,0.06), transparent 60%); }
+  .game-section{ padding:52px 0; border-bottom:1px solid var(--line); background:radial-gradient(ellipse at top, rgba(77,232,209,0.06), transparent 60%); }
   .game-select-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px; }
   @media (max-width:820px){ .game-select-grid{ grid-template-columns:1fr; } }
   .game-pick-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px; text-align:center; cursor:pointer; transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
@@ -217,7 +274,7 @@
   .station-price span{ color:var(--text-dim); font-weight:400; font-size:0.74rem; }
 
   /* ---------- RECEIPT / CAFE ---------- */
-  .receipt{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px 30px; max-width:640px; }
+  .receipt{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:26px 30px; max-width:640px; margin:0 auto; }
   .receipt-top{ text-align:center; padding-bottom:14px; border-bottom:1px dashed var(--line); margin-bottom:4px; }
   .menu-group{ margin-top:16px; }
   .menu-group h4{ font-family:'JetBrains Mono', monospace; font-size:0.74rem; color:var(--cyan); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px; }
@@ -300,7 +357,7 @@
   @media (max-width:760px){ .runner-controls-mobile{ display:flex; } .runner-hint{ display:none; } }
 
   /* ---------- BOOKING ---------- */
-  .booking-panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px; max-width:640px; }
+  .booking-panel{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:24px; max-width:640px; margin:0 auto; }
   .steps{ display:flex; gap:8px; margin-bottom:20px; }
   .step-pill{ flex:1; text-align:center; padding:8px; border-radius:7px; font-family:'JetBrains Mono', monospace; font-size:0.72rem; background:var(--surface-hi); color:var(--text-dim); }
   .step-pill.active{ background:var(--copper); color:var(--ink); font-weight:700; }
@@ -316,7 +373,7 @@
   .demo-note{ font-size:0.72rem; color:var(--text-dim); margin-top:12px; font-family:'JetBrains Mono', monospace; }
 
   /* ---------- MEMBERSHIP + PHOTO BOOTH ---------- */
-  .member-panel{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+  .member-panel{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
   .member-box{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:20px; }
   .member-box h3{ margin-bottom:12px; font-size:1rem; }
   .form-stack{ display:flex; flex-direction:column; gap:10px; }
@@ -386,7 +443,7 @@
   .spin-result{ font-family:'JetBrains Mono', monospace; font-size:1rem; color:var(--cyan); min-height:1.4em; font-weight:700; }
 
   /* ---------- FAQ ---------- */
-  .faq-list{ display:flex; flex-direction:column; gap:10px; max-width:760px; }
+  .faq-list{ display:flex; flex-direction:column; gap:10px; max-width:760px; margin:0 auto; }
   .faq-item{ background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .faq-q{ padding:16px 18px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; font-weight:600; font-size:0.92rem; }
   .faq-q:hover{ color:var(--cyan); }
@@ -594,8 +651,8 @@
 <!-- MENU (tabbed: Setup / Cafe / Combos) -->
 <section id="menu">
   <div class="wrap">
-    <div class="section-head reveal"><div><h2>Setup, Menu &amp; Combos</h2></div></div>
-    <div class="tab-bar reveal">
+    <h2 class="sr-only">Setup, Menu &amp; Combos</h2>
+    <div class="tab-bar reveal" style="margin-top:0;">
       <button class="tab-btn active" data-tab="tab-setup">🖥️ The Setup</button>
       <button class="tab-btn" data-tab="tab-cafe">☕ Cafe Menu</button>
       <button class="tab-btn" data-tab="tab-combos">⚡ Combos</button>
@@ -801,25 +858,24 @@
     </div>
 
     <div class="booth-wrap">
-      <h3 style="margin-bottom:12px; font-size:1.1rem;">GamePay Photo Booth</h3>
+      <h3 style="margin-bottom:12px; font-size:1.1rem;">GamePay AI Photo Booth</h3>
       <div id="lockedBanner" class="locked-banner">🔒 Costs 20 points per use. Sign up above to unlock.</div>
       <div class="booth-panel">
         <div>
           <div class="upload-zone" id="uploadZone" onclick="document.getElementById('boothFile').click()">
             <div style="font-size:1.8rem;">📷</div>
-            <p style="margin-top:8px;color:var(--text-dim);font-size:.86rem;">Click to upload your photo</p>
-            <input type="file" id="boothFile" accept="image/*" style="display:none;">
+            <p style="margin-top:8px;color:var(--text-dim);font-size:.86rem;" id="uploadZoneText">Click to upload your photo</p>
+            <input type="file" id="boothFile" accept="image/png,image/jpeg,image/webp" style="display:none;">
           </div>
-          <div class="frame-select" id="frameSelect">
-            <div class="frame-chip active" data-frame="cyan">Cyan HUD</div>
-            <div class="frame-chip" data-frame="copper">Copper Arcade</div>
-            <div class="frame-chip" data-frame="magenta">Tournament</div>
-          </div>
-          <button class="btn-primary" style="margin-top:14px;" onclick="renderBooth()">Generate (20 pts)</button>
+          <textarea id="boothPrompt" maxlength="400" rows="3" placeholder="Describe the scene — e.g. 'me with Tekken characters gossiping around a bonfire, cinematic lighting'" style="width:100%; margin-top:12px; padding:12px; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); color:var(--text); font-family:'Inter',sans-serif; font-size:.86rem; resize:vertical;"></textarea>
+          <div style="font-size:.7rem; color:var(--text-dim); margin-top:6px;">No explicit, violent, or hateful content — those requests will be blocked automatically.</div>
+          <button class="btn-primary" style="margin-top:14px;" id="boothGenerateBtn" onclick="renderBooth()">Generate with AI (20 pts)</button>
         </div>
         <div id="boothCanvasWrap">
-          <canvas id="boothCanvas" width="440" height="440"></canvas>
-          <div style="margin-top:10px;"><button class="btn-cyan" onclick="downloadBooth()">Download Image</button></div>
+          <div id="boothPlaceholder" style="padding:60px 10px; color:var(--text-dim); font-size:.86rem;">Your AI photo will appear here</div>
+          <div id="boothLoading" style="display:none; padding:60px 10px; color:var(--cyan); font-size:.86rem;">⏳ Generating your photo… this can take up to 20 seconds.</div>
+          <img id="boothOutputImg" style="display:none; max-width:100%; border-radius:9px;" alt="Your generated photo">
+          <div style="margin-top:10px;"><button class="btn-cyan" id="boothDownloadBtn" style="display:none;" onclick="downloadBooth()">Download Image</button></div>
         </div>
       </div>
     </div>
@@ -942,6 +998,38 @@
   const auth = getAuth(app);
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
+
+  // ⬇️ IMPORTANT: replace this with YOUR deployed Cloudflare Worker URL
+  // (looks like https://gamepay-photobooth.<your-subdomain>.workers.dev)
+  const WORKER_URL = "https://gamepayphotobooth.vivekarya8.workers.dev";
+
+  async function getIdTokenOrThrow(){
+    if(!auth.currentUser) throw new Error('Not signed in');
+    return await auth.currentUser.getIdToken();
+  }
+
+  window.fbGeneratePhotoBoothImage = async function(payload){
+    const idToken = await getIdTokenOrThrow();
+    const res = await fetch(`${WORKER_URL}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken, ...payload })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.message || data.error || 'Request failed');
+    return data;
+  };
+  window.fbDemoAddPoints = async function(amount){
+    const idToken = await getIdTokenOrThrow();
+    const res = await fetch(`${WORKER_URL}/buy-points`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken, amount })
+    });
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.message || data.error || 'Request failed');
+    return data;
+  };
 
   window.fbGetMember = async function(uid){
     const snap = await getDoc(doc(db, "members", uid));
@@ -1891,55 +1979,97 @@ async function logOut(){
 async function buyPoints(amount){
   const member = await getCurrentUser();
   if(!member){ showToast('Sign up or log in first to buy points.'); googleSignIn(); return; }
-  member.points += amount; await saveCurrentUser(member);
-  showToast(`+${amount} points added (demo purchase, no real charge).`); refreshMemberUI();
+  try{
+    await window.fbDemoAddPoints(amount);
+    showToast(`+${amount} points added (demo purchase, no real charge).`);
+    refreshMemberUI();
+  } catch(err){
+    console.error(err);
+    showToast('Could not add points — please try again.');
+  }
 }
 window.addEventListener('firebase-auth-changed', refreshMemberUI);
 refreshMemberUI();
 
-/* ---------- PHOTO BOOTH ---------- */
-let boothImage = null, boothFrame = 'cyan';
+/* ---------- AI PHOTO BOOTH (real generation, server-side, secure) ---------- */
+// Very small client-side pre-check just for instant UX feedback.
+// The REAL enforcement happens in the Cloud Function — never trust the client.
+const BOOTH_BLOCKLIST_HINT = /\b(nude|naked|porn|sex|xxx|gore|kill|blood|nazi|terrorist|suicide)\b/i;
+
+let boothFile = null, boothOutputBase64 = null, boothOutputMime = null;
 document.getElementById('boothFile').addEventListener('change', (e)=>{
   const file = e.target.files[0]; if(!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev)=>{ const img = new Image(); img.onload = ()=>{ boothImage = img; renderBooth(true); }; img.src = ev.target.result; };
-  reader.readAsDataURL(file);
+  if(file.size > 6*1024*1024){ showToast('Photo is too large — please use an image under 6MB.'); return; }
+  boothFile = file;
+  document.getElementById('uploadZoneText').textContent = `Selected: ${file.name}`;
 });
-document.querySelectorAll('.frame-chip').forEach(chip=>{
-  chip.addEventListener('click', ()=>{
-    document.querySelectorAll('.frame-chip').forEach(c=>c.classList.remove('active'));
-    chip.classList.add('active'); boothFrame = chip.dataset.frame;
-    if(boothImage) renderBooth(true);
+
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=> resolve(reader.result.split(',')[1]); // strip the data: prefix
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
-});
-async function renderBooth(skipCharge){
-  const canvas = document.getElementById('boothCanvas'); const ctx = canvas.getContext('2d');
-  ctx.clearRect(0,0,440,440);
-  if(!boothImage){ showToast('Upload a photo first.'); return; }
-  if(!skipCharge){
-    const member = await getCurrentUser();
-    if(!member){ showToast('Sign up and log in to use the Photo Booth.'); googleSignIn(); return; }
-    if(member.points < 20){ showToast('Not enough points — buy more below.'); return; }
-    member.points -= 20; await saveCurrentUser(member);
-    refreshMemberUI(); showToast('20 points used — generating your image!');
-  }
-  const colors = { cyan:"#4DE8D1", copper:"#E8A33D", magenta:"#FF4D6A" };
-  const accent = colors[boothFrame];
-  const size = Math.min(boothImage.width, boothImage.height);
-  const sx = (boothImage.width - size)/2, sy = (boothImage.height - size)/2;
-  ctx.drawImage(boothImage, sx, sy, size, size, 18, 18, 404, 404);
-  const grad = ctx.createLinearGradient(0,300,0,440);
-  grad.addColorStop(0, 'rgba(10,11,14,0)'); grad.addColorStop(1, 'rgba(10,11,14,0.85)');
-  ctx.fillStyle = grad; ctx.fillRect(18,300,404,140);
-  ctx.strokeStyle = accent; ctx.lineWidth = 6; ctx.strokeRect(18,18,404,404);
-  ctx.strokeStyle = accent; ctx.lineWidth = 2; ctx.strokeRect(9,9,422,422);
-  ctx.fillStyle = accent;
-  ctx.fillRect(18,18,36,4); ctx.fillRect(18,18,4,36);
-  ctx.fillRect(386,418,36,4); ctx.fillRect(418,386,4,36);
-  ctx.fillStyle = "#F2EFE9"; ctx.font = "bold 20px Arial"; ctx.fillText("GAMEPAY CAFE", 36, 400);
-  ctx.font = "12px monospace"; ctx.fillStyle = accent; ctx.fillText("PLAYER PROFILE · LEVEL UP", 36, 418);
 }
-function downloadBooth(){ const canvas = document.getElementById('boothCanvas'); const link = document.createElement('a'); link.download = 'gamepay-cafe-photo-booth.png'; link.href = canvas.toDataURL(); link.click(); }
+
+async function renderBooth(){
+  const promptEl = document.getElementById('boothPrompt');
+  const prompt = promptEl.value.trim();
+
+  if(!boothFile){ showToast('Upload a photo first.'); return; }
+  if(!prompt){ showToast('Describe what you want the photo to look like.'); return; }
+  if(BOOTH_BLOCKLIST_HINT.test(prompt)){
+    showToast('That description breaks our content rules — please rephrase.');
+    return;
+  }
+
+  const member = await getCurrentUser();
+  if(!member){ showToast('Sign up and log in to use the Photo Booth.'); googleSignIn(); return; }
+  if(member.points < 20){ showToast('Not enough points — buy more below.'); return; }
+
+  const btn = document.getElementById('boothGenerateBtn');
+  btn.disabled = true;
+  document.getElementById('boothPlaceholder').style.display = 'none';
+  document.getElementById('boothOutputImg').style.display = 'none';
+  document.getElementById('boothDownloadBtn').style.display = 'none';
+  document.getElementById('boothLoading').style.display = 'block';
+
+  try{
+    const imageBase64 = await fileToBase64(boothFile);
+    const data = await window.fbGeneratePhotoBoothImage({
+      imageBase64,
+      mimeType: boothFile.type || 'image/jpeg',
+      prompt
+    });
+    boothOutputBase64 = data.imageBase64;
+    boothOutputMime = data.mimeType || 'image/png';
+    const img = document.getElementById('boothOutputImg');
+    img.src = `data:${boothOutputMime};base64,${boothOutputBase64}`;
+    img.style.display = 'block';
+    document.getElementById('boothDownloadBtn').style.display = 'inline-block';
+    soundWin(); fireConfetti();
+    showToast(`Done! 20 points used — ${data.pointsRemaining} points left.`);
+    refreshMemberUI();
+  } catch(err){
+    console.error(err);
+    const msg = err?.message || 'Generation failed. Please try again.';
+    showToast(msg.replace(/^.*?:\s*/, '')); // strip Firebase's "functions/xyz:" prefix
+    document.getElementById('boothPlaceholder').style.display = 'block';
+  } finally {
+    document.getElementById('boothLoading').style.display = 'none';
+    btn.disabled = false;
+  }
+}
+
+function downloadBooth(){
+  if(!boothOutputBase64) return;
+  const ext = boothOutputMime.includes('png') ? 'png' : 'jpg';
+  const link = document.createElement('a');
+  link.download = `gamepay-cafe-photo-booth.${ext}`;
+  link.href = `data:${boothOutputMime};base64,${boothOutputBase64}`;
+  link.click();
+}
 
 /* ---------- REVIEWS ---------- */
 let selectedStars = 5;
