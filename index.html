@@ -139,12 +139,31 @@
   .btn-primary{ background:var(--copper); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease; }
   .btn-primary:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--copper-dim); }
   .btn-cyan{ background:var(--cyan); color:var(--ink); font-weight:600; padding:13px 24px; border:none; border-radius:9px; font-size:0.92rem; transition:transform .15s ease, box-shadow .15s ease;}
-  /* ---------- MINI GAME ---------- */
+  /* ---------- MINI GAME HUB ---------- */
   .game-section{ padding:44px 0 52px; border-bottom:1px solid var(--line); background:radial-gradient(ellipse at top, rgba(77,232,209,0.06), transparent 60%); }
-  .game-wrap{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px; }
-  #dashCanvas{ width:100%; max-width:800px; height:auto; aspect-ratio:800/260; display:block; margin:0 auto; background:linear-gradient(#0d1a17,#050706); border-radius:10px; touch-action:none; cursor:pointer; }
-  .game-hud{ display:flex; align-items:center; justify-content:center; gap:22px; margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:0.88rem; flex-wrap:wrap; }
+  .game-select-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:20px; }
+  @media (max-width:820px){ .game-select-grid{ grid-template-columns:1fr; } }
+  .game-pick-card{ background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:22px; text-align:center; cursor:pointer; transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+  .game-pick-card:hover{ transform:translateY(-4px); border-color:var(--cyan); box-shadow:0 10px 28px rgba(77,232,209,0.12); }
+  .game-pick-icon{ font-size:2.4rem; margin-bottom:10px; }
+  .game-pick-card h4{ font-size:1.05rem; margin-bottom:6px; }
+  .game-pick-card p{ font-size:0.82rem; color:var(--text-dim); min-height:34px; }
+  .game-pick-best{ display:inline-block; margin-top:10px; font-family:'JetBrains Mono', monospace; font-size:0.76rem; color:var(--copper); background:var(--copper-dim); padding:4px 12px; border-radius:100px; }
+  .game-play-area{ margin-top:20px; }
+  .game-back-btn{ background:none; border:1px solid var(--line); color:var(--text); padding:8px 16px; border-radius:8px; font-size:0.82rem; font-weight:600; margin-bottom:14px; }
+  .game-back-btn:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .game-wrap{ width:100%; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:16px; }
+  .game-wrap canvas{ width:100%; height:auto; display:block; margin:0 auto; background:linear-gradient(#0d1a17,#050706); border-radius:10px; touch-action:none; cursor:pointer; }
+  #dashCanvas, #bikeCanvas, #blitzCanvas{ aspect-ratio:1400/340; }
+  .game-hud{ display:flex; align-items:center; justify-content:center; gap:18px; margin-top:14px; font-family:'JetBrains Mono', monospace; font-size:0.86rem; flex-wrap:wrap; }
   .game-hud .hud-num{ color:var(--cyan); font-weight:700; }
+  .duck-btn{ background:var(--surface-hi); border:1px solid var(--line); color:var(--text); padding:10px 18px; border-radius:8px; font-size:0.82rem; font-weight:600; user-select:none; touch-action:none; }
+  .duck-btn:active, .duck-btn.active-duck{ background:var(--cyan); color:var(--ink); border-color:var(--cyan); }
+  .bike-controls{ display:flex; justify-content:center; gap:60px; margin-top:12px; }
+  .bike-ctrl-btn{ width:64px; height:64px; border-radius:50%; background:var(--surface-hi); border:1px solid var(--line); color:var(--cyan); font-size:1.4rem; font-weight:700; user-select:none; touch-action:none; }
+  .bike-ctrl-btn:active{ background:var(--cyan); color:var(--ink); }
+  .fuel-bar-outer{ width:110px; height:12px; background:var(--surface-hi); border:1px solid var(--line); border-radius:100px; overflow:hidden; display:inline-block; vertical-align:middle; margin-left:6px; }
+  .fuel-bar-inner{ height:100%; width:100%; background:var(--cyan); transition:width .15s ease, background .3s ease; }
   .google-btn{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; background:#fff; color:#1f1f1f; }
   .google-btn:hover{ background:#f2f2f2; }
   .btn-cyan:hover{ transform:translateY(-2px); box-shadow:0 10px 24px var(--cyan-dim); }
@@ -509,13 +528,64 @@
 
 <section class="game-section" id="minigame">
   <div class="wrap">
-    <div class="section-head reveal"><div><h2>GamePay Dash — Play While You Scroll 🎮</h2><p>Tap the screen, click, or press Space to jump. Dodge the obstacles, grab the coins!</p></div></div>
-    <div class="game-wrap reveal">
-      <canvas id="dashCanvas" width="800" height="260"></canvas>
-      <div class="game-hud">
-        <div>Score: <span class="hud-num" id="dashScore">0</span></div>
-        <div>Best: <span class="hud-num" id="dashBest">0</span></div>
-        <button class="btn-cyan" id="dashStartBtn">Start Game</button>
+    <div class="section-head reveal"><div><h2>Play While You Scroll 🎮</h2><p>Pick a game and jump right in — no download needed.</p></div></div>
+
+    <div class="game-select-grid reveal" id="gameSelectScreen">
+      <div class="game-pick-card" data-game="dash">
+        <div class="game-pick-icon">🏃</div>
+        <h4>GamePay Dash</h4>
+        <p>Jump obstacles, duck under flyers, chain combos.</p>
+        <span class="game-pick-best">Best: <span id="bestDashDisplay">0</span></span>
+      </div>
+      <div class="game-pick-card" data-game="bike">
+        <div class="game-pick-icon">🏍️</div>
+        <h4>Fuel Rush</h4>
+        <p>Switch lanes, grab fuel before your bike stalls.</p>
+        <span class="game-pick-best">Best: <span id="bestBikeDisplay">0</span></span>
+      </div>
+      <div class="game-pick-card" data-game="blitz">
+        <div class="game-pick-icon">🎯</div>
+        <h4>Combo Blitz</h4>
+        <p>Tap the glowing targets before time runs out.</p>
+        <span class="game-pick-best">Best: <span id="bestBlitzDisplay">0</span></span>
+      </div>
+    </div>
+
+    <div class="game-play-area" id="gamePlayArea" style="display:none;">
+      <button class="game-back-btn" id="gameBackBtn">← All Games</button>
+
+      <div class="game-wrap reveal" id="dashGameWrap" style="display:none;">
+        <canvas id="dashCanvas" width="1400" height="340"></canvas>
+        <div class="game-hud">
+          <div>Score: <span class="hud-num" id="dashScore">0</span></div>
+          <div>Best: <span class="hud-num" id="dashBest">0</span></div>
+          <button class="btn-cyan" id="dashStartBtn">Start Game</button>
+          <button class="duck-btn" id="dashDuckBtn">⬇ Hold to Duck</button>
+        </div>
+      </div>
+
+      <div class="game-wrap reveal" id="bikeGameWrap" style="display:none;">
+        <canvas id="bikeCanvas" width="1400" height="340"></canvas>
+        <div class="game-hud">
+          <div>Score: <span class="hud-num" id="bikeScore">0</span></div>
+          <div>Best: <span class="hud-num" id="bikeBest">0</span></div>
+          <div>Fuel<div class="fuel-bar-outer"><div class="fuel-bar-inner" id="fuelBarInner"></div></div></div>
+          <button class="btn-cyan" id="bikeStartBtn">Start Game</button>
+        </div>
+        <div class="bike-controls">
+          <button class="bike-ctrl-btn" id="bikeLeftBtn">◀</button>
+          <button class="bike-ctrl-btn" id="bikeRightBtn">▶</button>
+        </div>
+      </div>
+
+      <div class="game-wrap reveal" id="blitzGameWrap" style="display:none;">
+        <canvas id="blitzCanvas" width="1400" height="340"></canvas>
+        <div class="game-hud">
+          <div>Score: <span class="hud-num" id="blitzScore">0</span></div>
+          <div>Best: <span class="hud-num" id="blitzBest">0</span></div>
+          <div>Lives: <span class="hud-num" id="blitzLives">3</span></div>
+          <button class="btn-cyan" id="blitzStartBtn">Start Game</button>
+        </div>
       </div>
     </div>
   </div>
@@ -895,80 +965,138 @@
 </script>
 
 <script>
-/* ---------- MINI GAME: GamePay Dash (canvas endless runner w/ sound) ---------- */
+/* ---------- MINI GAME HUB: selection + shared audio helper ---------- */
+function gameBeep(ctxRef, freq, dur, type, vol){
+  if(!ctxRef) return;
+  const osc = ctxRef.createOscillator(); const gain = ctxRef.createGain();
+  osc.type = type || 'square'; osc.frequency.value = freq; gain.gain.value = vol || 0.15;
+  osc.connect(gain); gain.connect(ctxRef.destination);
+  osc.start();
+  gain.gain.exponentialRampToValueAtTime(0.001, ctxRef.currentTime + dur);
+  osc.stop(ctxRef.currentTime + dur);
+}
+(function(){
+  const selectScreen = document.getElementById('gameSelectScreen');
+  const playArea = document.getElementById('gamePlayArea');
+  if(!selectScreen) return;
+  const wraps = { dash: document.getElementById('dashGameWrap'), bike: document.getElementById('bikeGameWrap'), blitz: document.getElementById('blitzGameWrap') };
+  document.getElementById('bestDashDisplay').textContent = localStorage.getItem('dash_best') || '0';
+  document.getElementById('bestBikeDisplay').textContent = localStorage.getItem('bike_best') || '0';
+  document.getElementById('bestBlitzDisplay').textContent = localStorage.getItem('blitz_best') || '0';
+
+  selectScreen.querySelectorAll('.game-pick-card').forEach(card=>{
+    card.addEventListener('click', ()=>{
+      const g = card.dataset.game;
+      selectScreen.style.display = 'none';
+      playArea.style.display = 'block';
+      Object.values(wraps).forEach(w=> w.style.display = 'none');
+      wraps[g].style.display = 'block';
+      window.dispatchEvent(new CustomEvent('game-shown', { detail: g }));
+    });
+  });
+  document.getElementById('gameBackBtn').addEventListener('click', ()=>{
+    playArea.style.display = 'none';
+    selectScreen.style.display = 'grid';
+    document.getElementById('bestDashDisplay').textContent = localStorage.getItem('dash_best') || '0';
+    document.getElementById('bestBikeDisplay').textContent = localStorage.getItem('bike_best') || '0';
+    document.getElementById('bestBlitzDisplay').textContent = localStorage.getItem('blitz_best') || '0';
+    window.dispatchEvent(new Event('game-hidden'));
+  });
+})();
+
+/* ---------- GAME 1: GamePay Dash (jump + duck endless runner) ---------- */
 (function(){
   const canvas = document.getElementById('dashCanvas');
   if(!canvas) return;
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-  const groundY = H - 40;
+  const groundY = H - 50;
+  const STAND_H = 44, DUCK_H = 20;
 
   let audioCtx = null;
   function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } else if(audioCtx.state === 'suspended'){ audioCtx.resume(); } }
-  function beep(freq, dur, type, vol){
-    if(!audioCtx) return;
-    const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-    osc.type = type || 'square'; osc.frequency.value = freq; gain.gain.value = vol || 0.15;
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start();
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-    osc.stop(audioCtx.currentTime + dur);
-  }
-  function soundJump(){ beep(520, 0.12, 'square', 0.12); }
-  function soundCoin(){ beep(880, 0.08, 'sine', 0.15); setTimeout(()=>beep(1180,0.08,'sine',0.12), 60); }
-  function soundHit(){ beep(120, 0.35, 'sawtooth', 0.18); }
+  function soundJump(){ gameBeep(audioCtx, 520, 0.12, 'square', 0.12); }
+  function soundCoin(){ gameBeep(audioCtx, 880, 0.08, 'sine', 0.15); setTimeout(()=>gameBeep(audioCtx,1180,0.08,'sine',0.12), 60); }
+  function soundHit(){ gameBeep(audioCtx, 120, 0.35, 'sawtooth', 0.18); }
 
-  let player, obstacles, coins, score, best, speed, spawnTimer, coinTimer, state, lastTime;
+  let player, obstacles, coins, score, best, speed, spawnTimer, coinTimer, state, lastTime, ducking, running;
   best = parseInt(localStorage.getItem('dash_best') || '0', 10);
   document.getElementById('dashBest').textContent = best;
+  ducking = false; running = false;
 
   function resetGame(){
-    player = { x:60, y:groundY-34, w:28, h:34, vy:0, onGround:true };
+    player = { x:70, y:groundY-STAND_H, w:36, h:STAND_H, vy:0, onGround:true };
     obstacles = []; coins = [];
-    score = 0; speed = 300; spawnTimer = 0.6; coinTimer = 1.2;
-    state = 'running';
+    score = 0; speed = 340; spawnTimer = 0.7; coinTimer = 1.2;
+    state = 'running'; ducking = false;
     document.getElementById('dashScore').textContent = '0';
     document.getElementById('dashStartBtn').textContent = 'Restart';
   }
 
-  function jump(){
+  function doJump(){
     ensureAudio();
     if(state === 'idle' || state === 'gameover'){ resetGame(); return; }
-    if(state === 'running' && player.onGround){ player.vy = -560; player.onGround = false; soundJump(); }
+    if(state === 'running' && player.onGround && !ducking){ player.vy = -620; player.onGround = false; soundJump(); }
   }
-
-  canvas.addEventListener('click', jump);
-  canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); jump(); }, {passive:false});
+  canvas.addEventListener('click', doJump);
+  canvas.addEventListener('touchstart', (e)=>{ e.preventDefault(); doJump(); }, {passive:false});
   window.addEventListener('keydown', (e)=>{
-    if(e.code === 'Space' || e.code === 'ArrowUp'){
-      const rect = canvas.getBoundingClientRect();
-      if(rect.top < window.innerHeight && rect.bottom > 0){ e.preventDefault(); jump(); }
-    }
+    if(!running) return;
+    const rect = canvas.getBoundingClientRect();
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    if((e.code === 'Space' || e.code === 'ArrowUp') && inView){ e.preventDefault(); doJump(); }
+    if((e.code === 'ArrowDown' || e.code === 'KeyS') && inView){ e.preventDefault(); ducking = true; }
   });
+  window.addEventListener('keyup', (e)=>{ if(e.code === 'ArrowDown' || e.code === 'KeyS') ducking = false; });
+  const duckBtn = document.getElementById('dashDuckBtn');
+  const duckOn = (e)=>{ e.preventDefault(); ensureAudio(); ducking = true; duckBtn.classList.add('active-duck'); };
+  const duckOff = ()=>{ ducking = false; duckBtn.classList.remove('active-duck'); };
+  duckBtn.addEventListener('mousedown', duckOn); duckBtn.addEventListener('mouseup', duckOff); duckBtn.addEventListener('mouseleave', duckOff);
+  duckBtn.addEventListener('touchstart', duckOn, {passive:false}); duckBtn.addEventListener('touchend', duckOff);
   document.getElementById('dashStartBtn').addEventListener('click', ()=>{ ensureAudio(); resetGame(); });
 
-  function spawnObstacle(){ const h = 24 + Math.random()*22; obstacles.push({ x: W+20, y: groundY-h, w: 20+Math.random()*10, h }); }
-  function spawnCoin(){ const y = groundY - 60 - Math.random()*70; coins.push({ x: W+20, y, r:9, taken:false }); }
+  function spawnObstacle(){
+    const clusterChance = score > 150 ? 0.26 : 0.08;
+    const r = Math.random();
+    if(r < clusterChance){
+      const h = 30 + Math.random()*22;
+      obstacles.push({ type:'ground', x: W+20, y: groundY-h, w: 26, h });
+      obstacles.push({ type:'fly', x: W+20+180, y: groundY-46, w: 42, h:24 });
+    } else if(Math.random() < 0.34 + Math.min(speed/2200, 0.28)){
+      obstacles.push({ type:'fly', x: W+20, y: groundY-46, w: 42, h:24 });
+    } else {
+      const h = 30 + Math.random()*26;
+      obstacles.push({ type:'ground', x: W+20, y: groundY-h, w: 24+Math.random()*14, h });
+    }
+  }
+  function spawnCoin(){ const y = groundY - 80 - Math.random()*90; coins.push({ x: W+20, y, r:11, taken:false }); }
 
   function drawGround(){
     ctx.fillStyle = '#12211d'; ctx.fillRect(0, groundY, W, H-groundY);
-    ctx.strokeStyle = '#1d3a32'; ctx.lineWidth = 2;
+    ctx.strokeStyle = '#1d3a32'; ctx.lineWidth = 3;
     ctx.beginPath(); ctx.moveTo(0,groundY); ctx.lineTo(W,groundY); ctx.stroke();
   }
+  function getPlayerBox(){
+    if(player.onGround && ducking) return { x:player.x, y:groundY-DUCK_H, w:player.w, h:DUCK_H };
+    return { x:player.x, y:player.y, w:player.w, h:STAND_H };
+  }
   function drawPlayer(){
-    ctx.save(); ctx.translate(player.x, player.y);
-    ctx.fillStyle = '#4DE8D1'; ctx.fillRect(0,0,player.w,player.h*0.65);
-    ctx.fillStyle = '#E8A33D'; ctx.fillRect(4, player.h*0.65, player.w-8, player.h*0.35);
-    ctx.fillStyle = '#0A0B0E'; ctx.fillRect(player.w-11, 6, 5, 5);
+    const b = getPlayerBox();
+    ctx.save(); ctx.translate(b.x, b.y);
+    ctx.fillStyle = '#4DE8D1'; ctx.fillRect(0,0,b.w,b.h*0.62);
+    ctx.fillStyle = '#E8A33D'; ctx.fillRect(5, b.h*0.62, b.w-10, b.h*0.38);
+    ctx.fillStyle = '#0A0B0E'; ctx.fillRect(b.w-14, 6, 6, 6);
     ctx.restore();
   }
-  function drawObstacles(){ ctx.fillStyle = '#FF4D6A'; obstacles.forEach(o=>ctx.fillRect(o.x, o.y, o.w, o.h)); }
+  function drawObstacles(){
+    obstacles.forEach(o=>{ ctx.fillStyle = o.type === 'fly' ? '#FF7A4D' : '#FF4D6A'; ctx.fillRect(o.x, o.y, o.w, o.h); });
+  }
   function drawCoins(){ ctx.fillStyle = '#FFD54D'; coins.forEach(c=>{ if(!c.taken){ ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI*2); ctx.fill(); } }); }
-  function drawOverlay(text1, text2){
+  function drawOverlay(t1, t2){
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,W,H);
     ctx.textAlign = 'center';
-    ctx.fillStyle = '#fff'; ctx.font = 'bold 22px monospace'; ctx.fillText(text1, W/2, H/2 - (text2?12:0));
-    if(text2){ ctx.font = '15px monospace'; ctx.fillStyle = '#ccc'; ctx.fillText(text2, W/2, H/2 + 18); }
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 24px monospace'; ctx.fillText(t1, W/2, H/2 - (t2?14:0));
+    if(t2){ ctx.font = '16px monospace'; ctx.fillStyle = '#ccc'; ctx.fillText(t2, W/2, H/2 + 20); }
   }
   function rectsOverlap(a,b){ return a.x < b.x+b.w && a.x+a.w > b.x && a.y < b.y+b.h && a.y+a.h > b.y; }
 
@@ -980,20 +1108,20 @@
     drawGround();
 
     if(state === 'running'){
-      speed += dt*6;
-      player.vy += 1500*dt; player.y += player.vy*dt;
-      if(player.y > groundY-player.h){ player.y = groundY-player.h; player.vy = 0; player.onGround = true; }
+      speed += dt*11;
+      player.vy += 1750*dt; player.y += player.vy*dt;
+      if(player.y > groundY-STAND_H){ player.y = groundY-STAND_H; player.vy = 0; player.onGround = true; }
 
       spawnTimer -= dt; coinTimer -= dt;
-      if(spawnTimer <= 0){ spawnObstacle(); spawnTimer = Math.max(0.7, 1.5 - speed/900); }
-      if(coinTimer <= 0){ spawnCoin(); coinTimer = 1.4 + Math.random()*1.2; }
+      if(spawnTimer <= 0){ spawnObstacle(); spawnTimer = Math.max(0.52, 1.35 - speed/1000); }
+      if(coinTimer <= 0){ spawnCoin(); coinTimer = 1.3 + Math.random()*1.1; }
 
       obstacles.forEach(o=> o.x -= speed*dt);
       coins.forEach(c=> c.x -= speed*dt);
       obstacles = obstacles.filter(o=> o.x+o.w > -10);
       coins = coins.filter(c=> c.x > -20 && !c.taken);
 
-      const pBox = { x:player.x, y:player.y, w:player.w, h:player.h };
+      const pBox = getPlayerBox();
       for(const o of obstacles){
         if(rectsOverlap(pBox, o)){
           state = 'gameover'; soundHit();
@@ -1006,19 +1134,282 @@
           c.taken = true; score += 10; soundCoin();
         }
       }
-      score += Math.round(dt*20);
+      score += Math.round(dt*22);
       document.getElementById('dashScore').textContent = score;
     }
 
     drawObstacles(); drawCoins(); drawPlayer();
-    if(state === 'idle') drawOverlay('Tap / Click / Space to Play');
+    if(state === 'idle') drawOverlay('Tap / Click / Space to Play', '↓ or hold Duck to dodge flyers');
     if(state === 'gameover') drawOverlay('GAME OVER', 'Click / Tap / Space to try again');
 
     requestAnimationFrame(loop);
   }
   state = 'idle';
-  player = { x:60, y:groundY-34, w:28, h:34, vy:0, onGround:true };
+  player = { x:70, y:groundY-STAND_H, w:36, h:STAND_H, vy:0, onGround:true };
   obstacles = []; coins = []; score = 0;
+  requestAnimationFrame(loop);
+  window.addEventListener('game-shown', (e)=>{ running = (e.detail === 'dash'); });
+  window.addEventListener('game-hidden', ()=>{ running = false; });
+})();
+
+/* ---------- GAME 2: Fuel Rush (3-lane bike, collect fuel, avoid traffic) ---------- */
+(function(){
+  const canvas = document.getElementById('bikeCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const roadW = 420, roadX = (W-roadW)/2, laneW = roadW/3;
+  const laneX = [roadX+laneW*0.5, roadX+laneW*1.5, roadX+laneW*2.5];
+  const bikeY = H - 100;
+
+  let audioCtx = null;
+  function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } else if(audioCtx.state === 'suspended'){ audioCtx.resume(); } }
+  function soundFuel(){ gameBeep(audioCtx, 760, 0.09, 'sine', 0.15); }
+  function soundCrash(){ gameBeep(audioCtx, 90, 0.4, 'sawtooth', 0.2); }
+
+  let lane, bikeX, targetX, obstacles, fuels, fuel, score, best, speed, spawnTimer, fuelTimer, state, lastTime, roadOffset, running;
+  best = parseInt(localStorage.getItem('bike_best') || '0', 10);
+  document.getElementById('bikeBest').textContent = best;
+  running = false;
+
+  function updateFuelBar(){
+    const bar = document.getElementById('fuelBarInner');
+    bar.style.width = Math.max(0,fuel) + '%';
+    bar.style.background = fuel < 25 ? '#FF4D6A' : (fuel < 50 ? '#E8A33D' : '#4DE8D1');
+  }
+  function resetGame(){
+    lane = 1; bikeX = laneX[1]; targetX = laneX[1];
+    obstacles = []; fuels = [];
+    fuel = 100; score = 0; speed = 300; spawnTimer = 0.9; fuelTimer = 0.9; roadOffset = 0;
+    state = 'running';
+    document.getElementById('bikeScore').textContent = '0';
+    document.getElementById('bikeStartBtn').textContent = 'Restart';
+    updateFuelBar();
+  }
+  function moveLane(dir){ lane = Math.max(0, Math.min(2, lane+dir)); targetX = laneX[lane]; }
+
+  document.getElementById('bikeLeftBtn').addEventListener('click', ()=>{ ensureAudio(); if(state!=='running'){ resetGame(); return; } moveLane(-1); });
+  document.getElementById('bikeRightBtn').addEventListener('click', ()=>{ ensureAudio(); if(state!=='running'){ resetGame(); return; } moveLane(1); });
+  window.addEventListener('keydown', (e)=>{
+    if(!running) return;
+    const rect = canvas.getBoundingClientRect();
+    if(!(rect.top < window.innerHeight && rect.bottom > 0)) return;
+    if(e.code==='ArrowLeft' || e.code==='KeyA'){ e.preventDefault(); ensureAudio(); if(state!=='running'){ resetGame(); return; } moveLane(-1); }
+    if(e.code==='ArrowRight' || e.code==='KeyD'){ e.preventDefault(); ensureAudio(); if(state!=='running'){ resetGame(); return; } moveLane(1); }
+  });
+  canvas.addEventListener('click', (e)=>{
+    ensureAudio();
+    if(state!=='running'){ resetGame(); return; }
+    const rect = canvas.getBoundingClientRect();
+    const cx = (e.clientX-rect.left)/rect.width*W;
+    moveLane(cx < W/2 ? -1 : 1);
+  });
+  canvas.addEventListener('touchstart', (e)=>{
+    e.preventDefault(); ensureAudio();
+    if(state!=='running'){ resetGame(); return; }
+    const rect = canvas.getBoundingClientRect(); const tch = e.touches[0];
+    const cx = (tch.clientX-rect.left)/rect.width*W;
+    moveLane(cx < W/2 ? -1 : 1);
+  }, {passive:false});
+  document.getElementById('bikeStartBtn').addEventListener('click', ()=>{ ensureAudio(); resetGame(); });
+
+  function spawnObstacle(){ obstacles.push({ lane: Math.floor(Math.random()*3), y:-60, w:52, h:78 }); }
+  function spawnFuel(){ fuels.push({ lane: Math.floor(Math.random()*3), y:-40, r:16, taken:false }); }
+
+  function drawRoad(){
+    ctx.fillStyle = '#0d1a17'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = '#17251f'; ctx.fillRect(roadX,0,roadW,H);
+    ctx.strokeStyle = 'rgba(77,232,209,0.28)'; ctx.lineWidth = 3; ctx.setLineDash([24,20]);
+    ctx.lineDashOffset = -roadOffset;
+    for(let i=1;i<3;i++){ ctx.beginPath(); ctx.moveTo(roadX+laneW*i, 0); ctx.lineTo(roadX+laneW*i, H); ctx.stroke(); }
+    ctx.setLineDash([]);
+    ctx.strokeStyle = '#4DE8D1'; ctx.lineWidth = 3; ctx.strokeRect(roadX,0,roadW,H);
+  }
+  function drawBike(){
+    ctx.save(); ctx.translate(bikeX-20, bikeY-36);
+    ctx.fillStyle = '#4DE8D1'; ctx.fillRect(7,0,26,50);
+    ctx.fillStyle = '#0A0B0E'; ctx.beginPath(); ctx.arc(20,5,10,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#E8A33D'; ctx.fillRect(0,50,11,11); ctx.fillRect(29,50,11,11);
+    ctx.restore();
+  }
+  function drawObstacles(){ ctx.fillStyle = '#FF4D6A'; obstacles.forEach(o=> ctx.fillRect(laneX[o.lane]-o.w/2, o.y, o.w, o.h)); }
+  function drawFuels(){
+    fuels.forEach(f=>{
+      if(f.taken) return;
+      ctx.fillStyle = '#FFD54D'; ctx.beginPath(); ctx.arc(laneX[f.lane], f.y, f.r, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#0A0B0E'; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center'; ctx.fillText('F', laneX[f.lane], f.y+5);
+    });
+  }
+  function drawOverlay(t1,t2){
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = 'bold 24px monospace';
+    ctx.fillText(t1, W/2, H/2-(t2?14:0));
+    if(t2){ ctx.font = '15px monospace'; ctx.fillStyle = '#ccc'; ctx.fillText(t2, W/2, H/2+20); }
+  }
+  function circleRectOverlap(cx,cy,r,rx,ry,rw,rh){
+    const nx = Math.max(rx, Math.min(cx, rx+rw)), ny = Math.max(ry, Math.min(cy, ry+rh));
+    const dx = cx-nx, dy = cy-ny; return (dx*dx+dy*dy) < r*r;
+  }
+
+  function loop(t){
+    if(!lastTime) lastTime = t;
+    const dt = Math.min((t-lastTime)/1000, 0.033);
+    lastTime = t;
+    bikeX += (targetX-bikeX)*Math.min(dt*11,1);
+    roadOffset += speed*dt;
+    ctx.clearRect(0,0,W,H);
+    drawRoad();
+
+    if(state === 'running'){
+      speed += dt*9;
+      fuel -= dt*7.5;
+      if(fuel <= 0){
+        fuel = 0; state = 'gameover'; soundCrash();
+        if(score > best){ best = score; localStorage.setItem('bike_best', best); document.getElementById('bikeBest').textContent = best; }
+      }
+      updateFuelBar();
+
+      if(state === 'running'){
+        spawnTimer -= dt; fuelTimer -= dt;
+        if(spawnTimer <= 0){ spawnObstacle(); spawnTimer = Math.max(0.46, 1.15 - speed/1300); }
+        if(fuelTimer <= 0){ spawnFuel(); fuelTimer = 1.7 + Math.random()*1.3; }
+
+        obstacles.forEach(o=> o.y += speed*dt);
+        fuels.forEach(f=> f.y += speed*dt);
+        obstacles = obstacles.filter(o=> o.y < H+60);
+        fuels = fuels.filter(f=> f.y < H+50 && !f.taken);
+
+        const bBox = { x:bikeX-16, y:bikeY-36, w:32, h:50 };
+        for(const o of obstacles){
+          const ox = laneX[o.lane]-o.w/2;
+          if(bBox.x < ox+o.w && bBox.x+bBox.w > ox && bBox.y < o.y+o.h && bBox.y+bBox.h > o.y){
+            state = 'gameover'; soundCrash();
+            if(score > best){ best = score; localStorage.setItem('bike_best', best); document.getElementById('bikeBest').textContent = best; }
+            break;
+          }
+        }
+        for(const f of fuels){
+          if(!f.taken && circleRectOverlap(laneX[f.lane], f.y, f.r, bBox.x, bBox.y, bBox.w, bBox.h)){
+            f.taken = true; fuel = Math.min(100, fuel+20); score += 15; soundFuel(); updateFuelBar();
+          }
+        }
+        score += Math.round(dt*14);
+        document.getElementById('bikeScore').textContent = score;
+      }
+    }
+
+    drawObstacles(); drawFuels(); drawBike();
+    if(state === 'idle') drawOverlay('◀ ▶ or A / D to switch lanes', 'Grab fuel — don\'t run dry!');
+    if(state === 'gameover') drawOverlay(fuel<=0 ? 'OUT OF FUEL!' : 'CRASHED!', 'Tap / click to try again');
+
+    requestAnimationFrame(loop);
+  }
+  state = 'idle'; lane = 1; bikeX = laneX[1]; targetX = laneX[1];
+  obstacles = []; fuels = []; fuel = 100; score = 0; speed = 300;
+  updateFuelBar();
+  requestAnimationFrame(loop);
+  window.addEventListener('game-shown', (e)=>{ running = (e.detail === 'bike'); });
+  window.addEventListener('game-hidden', ()=>{ running = false; });
+})();
+
+/* ---------- GAME 3: Combo Blitz (reflex tap — hit targets before they vanish) ---------- */
+(function(){
+  const canvas = document.getElementById('blitzCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const colors = ['#4DE8D1','#E8A33D','#FF4D6A'];
+
+  let audioCtx = null;
+  function ensureAudio(){ if(!audioCtx){ try{ audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } else if(audioCtx.state === 'suspended'){ audioCtx.resume(); } }
+  function soundHit(){ gameBeep(audioCtx, 700, 0.08, 'square', 0.14); }
+  function soundMiss(){ gameBeep(audioCtx, 150, 0.2, 'sawtooth', 0.15); }
+  function soundOver(){ gameBeep(audioCtx, 100, 0.4, 'sawtooth', 0.18); }
+
+  let targets, score, best, lives, spawnTimer, state, lastTime;
+  best = parseInt(localStorage.getItem('blitz_best') || '0', 10);
+  document.getElementById('blitzBest').textContent = best;
+
+  function resetGame(){
+    targets = []; score = 0; lives = 3; spawnTimer = 0.4; state = 'running';
+    document.getElementById('blitzScore').textContent = '0';
+    document.getElementById('blitzLives').textContent = '3';
+    document.getElementById('blitzStartBtn').textContent = 'Restart';
+  }
+  function spawnTarget(){
+    const r = 30 + Math.random()*18;
+    const x = r + Math.random()*(W-2*r), y = r + Math.random()*(H-2*r);
+    const life = Math.max(0.5, 1.35 - score/450);
+    targets.push({ x, y, r, life, maxLife: life, color: colors[Math.floor(Math.random()*colors.length)], hit:false });
+  }
+  function handleTap(px, py){
+    ensureAudio();
+    if(state !== 'running'){ resetGame(); return; }
+    for(const tg of targets){
+      if(tg.hit) continue;
+      const dx = px-tg.x, dy = py-tg.y;
+      if(dx*dx+dy*dy <= tg.r*tg.r){ tg.hit = true; score += Math.round(10 + tg.r); soundHit(); break; }
+    }
+  }
+  canvas.addEventListener('click', (e)=>{
+    const rect = canvas.getBoundingClientRect();
+    handleTap((e.clientX-rect.left)/rect.width*W, (e.clientY-rect.top)/rect.height*H);
+  });
+  canvas.addEventListener('touchstart', (e)=>{
+    e.preventDefault();
+    const rect = canvas.getBoundingClientRect(); const t = e.touches[0];
+    handleTap((t.clientX-rect.left)/rect.width*W, (t.clientY-rect.top)/rect.height*H);
+  }, {passive:false});
+  document.getElementById('blitzStartBtn').addEventListener('click', ()=>{ ensureAudio(); resetGame(); });
+
+  function drawTargets(){
+    targets.forEach(tg=>{
+      if(tg.hit) return;
+      const pct = tg.life/tg.maxLife;
+      ctx.beginPath(); ctx.arc(tg.x, tg.y, tg.r, 0, Math.PI*2); ctx.fillStyle = tg.color+'cc'; ctx.fill();
+      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+      ctx.beginPath(); ctx.arc(tg.x, tg.y, tg.r+4, -Math.PI/2, -Math.PI/2 + pct*Math.PI*2); ctx.stroke();
+    });
+  }
+  function drawOverlay(t1,t2){
+    ctx.fillStyle = 'rgba(0,0,0,0.55)'; ctx.fillRect(0,0,W,H);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#fff'; ctx.font = 'bold 24px monospace';
+    ctx.fillText(t1, W/2, H/2-(t2?14:0));
+    if(t2){ ctx.font = '15px monospace'; ctx.fillStyle = '#ccc'; ctx.fillText(t2, W/2, H/2+20); }
+  }
+
+  function loop(t){
+    if(!lastTime) lastTime = t;
+    const dt = Math.min((t-lastTime)/1000, 0.033);
+    lastTime = t;
+    ctx.fillStyle = '#0d1a17'; ctx.fillRect(0,0,W,H);
+
+    if(state === 'running'){
+      spawnTimer -= dt;
+      if(spawnTimer <= 0){ spawnTarget(); spawnTimer = Math.max(0.48, 1.1 - score/500); }
+      targets.forEach(tg=>{
+        if(tg.hit) return;
+        tg.life -= dt;
+        if(tg.life <= 0){
+          tg.hit = true; lives -= 1; soundMiss();
+          document.getElementById('blitzLives').textContent = Math.max(0, lives);
+          if(lives <= 0){
+            state = 'gameover'; soundOver();
+            if(score > best){ best = score; localStorage.setItem('blitz_best', best); document.getElementById('blitzBest').textContent = best; }
+          }
+        }
+      });
+      targets = targets.filter(tg=> !tg.hit);
+      document.getElementById('blitzScore').textContent = score;
+    }
+
+    drawTargets();
+    if(state === 'idle') drawOverlay('Tap the targets before they vanish!');
+    if(state === 'gameover') drawOverlay('GAME OVER', `Score: ${score} — Tap to retry`);
+
+    requestAnimationFrame(loop);
+  }
+  state = 'idle'; targets = []; score = 0; lives = 3;
   requestAnimationFrame(loop);
 })();
 
