@@ -387,6 +387,10 @@
   /* ---------- LOGIN MODAL / NAV AUTH ---------- */
   .nav-login-btn{ border:1px solid var(--line); padding:8px 18px; border-radius:8px; font-size:0.82rem; font-weight:700; color:var(--text); background:transparent; text-transform:uppercase; letter-spacing:0.02em; transition:border-color .15s ease, color .15s ease; }
   .nav-login-btn:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .nav-whatsapp-btn{ display:flex; align-items:center; gap:7px; border:1px solid rgba(37,211,102,0.4); padding:8px 16px; border-radius:8px; font-size:0.82rem; font-weight:700; color:#25D366; background:rgba(37,211,102,0.08); text-transform:uppercase; letter-spacing:0.02em; transition:border-color .15s ease, background .15s ease, transform .15s ease; white-space:nowrap; }
+  .nav-whatsapp-btn:hover{ border-color:#25D366; background:rgba(37,211,102,0.16); transform:translateY(-1px); }
+  .nav-whatsapp-btn svg{ width:16px; height:16px; flex-shrink:0; }
+  @media (max-width:520px){ .nav-whatsapp-btn span{ display:none; } .nav-whatsapp-btn{ padding:9px; } }
   .nav-profile-chip{ display:flex; align-items:center; gap:8px; cursor:pointer; border:1px solid var(--line); padding:7px 14px; border-radius:20px; font-size:0.82rem; font-weight:600; transition:border-color .15s ease; }
   .nav-profile-chip:hover{ border-color:var(--cyan); }
   .login-modal-overlay{ position:fixed; inset:0; background:rgba(6,7,10,0.7); backdrop-filter:blur(3px); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px; }
@@ -535,6 +539,10 @@
       <a href="#booking">Book</a><a href="#membership">Membership</a><a href="#spinwheel">Spin &amp; Win</a><a href="#reviews">Reviews</a><a href="#faq">FAQ</a><a href="#contact">Contact</a>
     </div>
     <div class="nav-right">
+      <a class="nav-whatsapp-btn" id="navWhatsappBtn" href="https://wa.me/919716261070?text=Hi%20GamePay%20Cafe%21%20%F0%9F%91%8B%20I%27d%20like%20to%20know%20more." target="_blank" rel="noopener" onclick="gtagWaClick && gtagWaClick()">
+        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.05 2C6.607 2 2.2 6.407 2.2 11.85c0 1.988.526 3.85 1.44 5.46L2 22l4.827-1.596a9.75 9.75 0 0 0 5.223 1.496h.004c5.443 0 9.85-4.407 9.85-9.85C21.904 6.607 17.497 2 12.05 2Zm0 17.938h-.003a8.08 8.08 0 0 1-4.126-1.13l-.296-.176-3.075 1.016.99-3.006-.193-.31a8.08 8.08 0 0 1-1.246-4.32c0-4.472 3.638-8.11 8.11-8.11 2.166 0 4.2.845 5.732 2.378a8.05 8.05 0 0 1 2.377 5.735c0 4.472-3.638 8.11-8.11 8.11Z"/></svg>
+        <span>WhatsApp</span>
+      </a>
       <button class="nav-login-btn" id="navLoginBtn" onclick="googleSignIn()">Login with Google</button>
       <div class="nav-profile-chip" id="navProfileChip" style="display:none;" onclick="document.getElementById('membership').scrollIntoView({behavior:'smooth'})">
         <span id="navProfileName">—</span>
@@ -2147,7 +2155,7 @@ function playTone(freqs, duration=0.12, type='sine', gain=0.08){
 }
 function soundSuccess(){ playTone([523.25, 659.25, 783.99], 0.11, 'triangle', 0.09); }
 function soundClick(){ playTone([300], 0.05, 'square', 0.05); }
-function soundWin(){ playTone([392, 523.25, 659.25, 783.99, 987.77], 0.1, 'triangle', 0.09); }
+function soundWin(){ playTone([392, 523.25, 659.25, 783.97, 987.77], 0.1, 'triangle', 0.09); }
 
 /* ---------- CONFETTI ---------- */
 const confettiCanvas = document.getElementById('confettiCanvas');
