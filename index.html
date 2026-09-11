@@ -505,6 +505,7 @@
     .chat-panel{ width:calc(100vw - 40px); left:20px; }
   }
 </style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 </head>
 <body>
 <div class="grid-bg"></div>
@@ -789,7 +790,7 @@
 <!-- BOOKING -->
 <section id="booking">
   <div class="wrap">
-    <div class="section-head reveal"><div><h2>Book Your Station</h2><p>Demo checkout — connect Razorpay/Stripe to go live.</p></div></div>
+    <div class="section-head reveal"><div><h2>Book Your Station</h2><p>Secure online payment via Razorpay — instant confirmation.</p></div></div>
     <div class="booking-panel reveal">
       <div class="steps">
         <div class="step-pill active" id="stepPill1">1. Select</div>
@@ -817,7 +818,7 @@
           <div class="form-field"><label>Date</label><input type="date" id="bDate"></div>
           <div class="form-field"><label>Time Slot</label><select id="bTime"><option>11:00 AM</option><option>1:00 PM</option><option>4:00 PM</option><option>7:00 PM</option><option>10:00 PM</option></select></div>
         </div>
-        <div class="step-actions"><button class="btn-ghost" onclick="goStep(1)">Back</button><button class="btn-primary" onclick="goStep(3)">Next: Payment</button></div>
+        <div class="step-actions"><button class="btn-ghost" onclick="goStep(1)">Back</button><button class="btn-primary" id="toPaymentBtn" onclick="goToPayment()">Next: Payment</button></div>
       </div>
       <div id="bookStep3" style="display:none;">
         <div class="booking-summary" id="bookingSummary"></div>
@@ -825,8 +826,8 @@
           <div class="form-field"><label>Name</label><input type="text" id="bName" placeholder="Your name"></div>
           <div class="form-field"><label>Phone</label><input type="tel" id="bPhone" placeholder="10-digit number"></div>
         </div>
-        <div class="step-actions"><button class="btn-ghost" onclick="goStep(2)">Back</button><button class="btn-primary" onclick="confirmBooking()">Pay &amp; Confirm</button></div>
-        <div class="demo-note">⚠ Demo checkout — no real payment processed.</div>
+        <div class="step-actions"><button class="btn-ghost" onclick="goStep(2)">Back</button><button class="btn-primary" id="payConfirmBtn" onclick="confirmBooking()">Pay &amp; Confirm</button></div>
+        <div class="demo-note">🔒 Payments are securely processed by Razorpay.</div>
       </div>
     </div>
   </div>
@@ -1886,7 +1887,11 @@ wallThemes.forEach((theme)=>{
 })();
 
 
-/* ---------- BOOKING FLOW ---------- */
+/* ---------- BOOKING FLOW (real payment via Razorpay) ---------- */
+
+// CHANGE THIS to your deployed backend URL (the same server running your WhatsApp bot)
+const BOOKING_BACKEND_URL = "https://your-backend-url.onrender.com";
+
 function goStep(n){
   [1,2,3].forEach(i=>{ document.getElementById('bookStep'+i).style.display = i===n ? 'block' : 'none'; document.getElementById('stepPill'+i).classList.toggle('active', i===n); });
   if(n===3) buildSummary();
@@ -1899,16 +1904,125 @@ function buildSummary(){
   const total = parseInt(price) * parseInt(hours);
   document.getElementById('bookingSummary').innerHTML = `<div class="row"><span>Station</span><span>${station}</span></div><div class="row"><span>Duration</span><span>${hours} hr(s)</span></div><div class="row"><span>Slot</span><span>${date} · ${time}</span></div><div class="row"><span>Total</span><span>₹${total}</span></div>`;
 }
-function confirmBooking(){
+
+// Runs when the customer clicks "Next: Payment" - checks the chosen date/time
+// isn't already taken before letting them proceed, so they don't fill in
+// name/phone only to hit a "slot taken" error at the very last step.
+async function goToPayment(){
+  const date = document.getElementById('bDate').value;
+  const time = document.getElementById('bTime').value;
+  const [station] = document.getElementById('bStation').value.split('|');
+
+  if(!date){ showToast('Please pick a date.'); return; }
+
+  const btn = document.getElementById('toPaymentBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Checking availability...';
+
+  try {
+    const res = await fetch(`${BOOKING_BACKEND_URL}/api/booked-slots?date=${date}`);
+    const data = await res.json();
+    const clash = (data.taken || []).some(b => b.time === time && b.stationType === station);
+    if(clash){
+      showToast(`${station} at ${time} on ${date} is already booked. Please pick another slot.`);
+      return;
+    }
+    goStep(3);
+  } catch(err){
+    console.error('Availability check failed:', err);
+    // Don't block the customer just because the availability check failed -
+    // the server will still safely reject a double-booking at payment time.
+    goStep(3);
+  } finally {
+    btn.disabled = false; btn.textContent = originalLabel;
+  }
+}
+
+// Runs when the customer clicks "Pay & Confirm" - creates a real Razorpay
+// order, opens the payment popup, and only confirms the booking once the
+// server has verified the payment actually went through.
+async function confirmBooking(){
   const name = document.getElementById('bName').value.trim();
   const phone = document.getElementById('bPhone').value.trim();
   if(!name || !phone){ showToast('Please enter your name and phone number.'); return; }
-  const bookings = JSON.parse(localStorage.getItem('gp_bookings') || '[]');
-  bookings.push({ name, phone, station: document.getElementById('bStation').value, date: document.getElementById('bDate').value, time: document.getElementById('bTime').value, ts: Date.now() });
-  localStorage.setItem('gp_bookings', JSON.stringify(bookings));
-  soundSuccess(); fireConfetti();
-  showToast(`Booking confirmed for ${name}! (Demo — no real charge made)`);
-  goStep(1); document.getElementById('bName').value=''; document.getElementById('bPhone').value='';
+  if(!/^\d{10}$/.test(phone.replace(/\D/g,'').slice(-10))){ showToast('Please enter a valid 10-digit phone number.'); return; }
+
+  const [stationType] = document.getElementById('bStation').value.split('|');
+  const duration = document.getElementById('bDuration').value;
+  const date = document.getElementById('bDate').value;
+  const time = document.getElementById('bTime').value;
+  const cleanPhone = '91' + phone.replace(/\D/g,'').slice(-10); // WhatsApp format
+
+  const btn = document.getElementById('payConfirmBtn');
+  const originalLabel = btn.textContent;
+  btn.disabled = true; btn.textContent = 'Starting payment...';
+
+  try {
+    const orderRes = await fetch(`${BOOKING_BACKEND_URL}/api/create-order`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stationType, duration, date, time, name, phone: cleanPhone })
+    });
+    const order = await orderRes.json();
+
+    if(!orderRes.ok){
+      showToast(order.error || 'Could not start booking. Please try again.');
+      return;
+    }
+
+    const rzp = new Razorpay({
+      key: order.key,
+      amount: order.amount,
+      currency: order.currency,
+      order_id: order.orderId,
+      name: 'GamePay Cafe',
+      description: `${stationType} · ${duration}hr · ${date} ${time}`,
+      prefill: { name, contact: cleanPhone },
+      theme: { color: '#4DE8D1' },
+      handler: async function(response){
+        btn.textContent = 'Confirming booking...';
+        try {
+          const verifyRes = await fetch(`${BOOKING_BACKEND_URL}/api/verify-payment`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature
+            })
+          });
+          const verifyData = await verifyRes.json();
+          if(verifyData.success){
+            soundSuccess(); fireConfetti();
+            showToast(`Booking confirmed for ${name}! Check WhatsApp for your confirmation.`);
+            goStep(1);
+            document.getElementById('bName').value=''; document.getElementById('bPhone').value='';
+          } else {
+            showToast(verifyData.error || 'Payment could not be verified. Contact us on WhatsApp if you were charged.');
+          }
+        } catch(err){
+          console.error('verify-payment failed:', err);
+          showToast('Payment made but confirmation failed. Please contact us on WhatsApp with your payment ID.');
+        } finally {
+          btn.disabled = false; btn.textContent = originalLabel;
+        }
+      },
+      modal: {
+        ondismiss: function(){
+          btn.disabled = false; btn.textContent = originalLabel;
+        }
+      }
+    });
+    rzp.on('payment.failed', function(response){
+      showToast('Payment failed: ' + (response.error?.description || 'please try again.'));
+      btn.disabled = false; btn.textContent = originalLabel;
+    });
+    rzp.open();
+  } catch(err){
+    console.error('create-order failed:', err);
+    showToast('Something went wrong starting the payment. Please try again.');
+    btn.disabled = false; btn.textContent = originalLabel;
+  }
 }
 
 /* ---------- MEMBERSHIP / POINTS ---------- */
