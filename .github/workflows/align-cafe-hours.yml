@@ -1,0 +1,37 @@
+name: Align cafe hours
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  align:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Align public hours metadata
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          replacements = {
+              'Open daily 11 AM – 1 AM. Book your station now.': 'Open daily 9 AM – 1 AM. Book your station now.',
+              'Open daily 11 AM – 1 AM.': 'Open daily 9 AM – 1 AM.',
+              '"opens": "11:00"': '"opens": "09:00"',
+          }
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+          p.write_text(s)
+          PY
+          rm -f .github/workflows/align-cafe-hours.yml
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/align-cafe-hours.yml
+          git commit -m "Align website hours metadata with cafe hours"
+          git push
