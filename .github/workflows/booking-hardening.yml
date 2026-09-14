@@ -1,0 +1,52 @@
+name: Apply booking hardening
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch booking flow
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+
+          s2 = s.replace(
+              '<script src="https://checkout.razorpay.com/v1/checkout.js"></script>',
+              '<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>',
+              1,
+          )
+
+          old = '''    const res = await fetch(`${BOOKING_BACKEND_URL}/api/booked-slots?date=${date}`);\n    const data = await res.json();\n    const clash = (data.taken || []).some(b => b.time === time && b.stationType === station);'''
+          new = '''    const controller = new AbortController();\n    const timeout = setTimeout(() => controller.abort(), 8000);\n    const res = await fetch(`${BOOKING_BACKEND_URL}/api/booked-slots?date=${date}`, { signal: controller.signal });\n    clearTimeout(timeout);\n    if(!res.ok) throw new Error(`Availability request failed: ${res.status}`);\n    const data = await res.json();\n    const clash = (data.taken || []).some(b => b.time === time && b.stationType === station);'''
+          if old in s2:
+              s2 = s2.replace(old, new, 1)
+
+          old_catch = '''  } catch(err){\n    console.error('Availability check failed:', err);\n    // Don't block the customer just because the availability check failed -\n    // the server will still safely reject a double-booking at payment time.\n    goStep(3);\n  } finally {'''
+          new_catch = '''  } catch(err){\n    console.error('Availability check failed:', err);\n    showToast('Could not check slot availability. Please try again in a moment.');\n    return;\n  } finally {'''
+          if old_catch in s2:
+              s2 = s2.replace(old_catch, new_catch, 1)
+
+          if s2 == s:
+              raise SystemExit('No frontend hardening change was applied; aborting.')
+          p.write_text(s2)
+          PY
+
+          rm -f .github/workflows/booking-hardening.yml
+
+      - name: Commit hardened frontend and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/booking-hardening.yml
+          git commit -m "Harden website booking availability flow"
+          git push
