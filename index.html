@@ -505,7 +505,7 @@
     .chat-panel{ width:calc(100vw - 40px); left:20px; }
   }
 </style>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js" defer></script>
 </head>
 <body>
 <div class="grid-bg"></div>
@@ -1920,7 +1920,11 @@ async function goToPayment(){
   btn.disabled = true; btn.textContent = 'Checking availability...';
 
   try {
-    const res = await fetch(`${BOOKING_BACKEND_URL}/api/booked-slots?date=${date}`);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(`${BOOKING_BACKEND_URL}/api/booked-slots?date=${date}`, { signal: controller.signal });
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error(`Availability request failed: ${res.status}`);
     const data = await res.json();
     const clash = (data.taken || []).some(b => b.time === time && b.stationType === station);
     if(clash){
@@ -1930,9 +1934,8 @@ async function goToPayment(){
     goStep(3);
   } catch(err){
     console.error('Availability check failed:', err);
-    // Don't block the customer just because the availability check failed -
-    // the server will still safely reject a double-booking at payment time.
-    goStep(3);
+    showToast('Could not check slot availability. Please try again in a moment.');
+    return;
   } finally {
     btn.disabled = false; btn.textContent = originalLabel;
   }
