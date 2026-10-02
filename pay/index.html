@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gamepay Cafe — Payment</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(145deg,#071014,#101a20);color:#fff;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{width:min(430px,100%);background:rgba(18,25,30,.96);border:1px solid rgba(184,240,242,.25);border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.logo{font-size:30px;font-weight:800;letter-spacing:1px}.sub{color:#a9b7bc;margin-top:5px;font-size:13px;letter-spacing:1.5px}
+.label{margin-top:26px;color:#a9b7bc;font-size:12px;text-transform:uppercase;letter-spacing:1.5px}.name{font-size:23px;font-weight:700;margin-top:6px}
+.amount{font-size:42px;font-weight:900;margin:8px 0 18px;color:#fff}.qr{background:#fff;border-radius:18px;padding:14px;width:240px;height:240px;margin:0 auto;display:flex;align-items:center;justify-content:center}.qr img{max-width:100%;max-height:100%}
+.pay{display:block;text-decoration:none;margin:20px auto 10px;background:#b8f0f2;color:#071014;font-weight:900;font-size:18px;padding:15px 20px;border-radius:14px}
+.upi{font-size:13px;color:#b8c4c8;margin-top:12px}.upi b{color:#fff}.note{font-size:12px;color:#87979d;line-height:1.5;margin-top:18px}
+.brand{margin-top:22px;font-size:13px;font-weight:700;letter-spacing:1px}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">🎮 GAMEPAY CAFE</div>
+  <div class="sub">SECURE PAYMENT</div>
+  <div class="label">Payment For</div>
+  <div class="name" id="customer">Customer</div>
+  <div class="label">Pending Amount</div>
+  <div class="amount" id="amount">₹0</div>
+  <div class="qr"><img id="qr" alt="Gamepay Cafe Payment QR"></div>
+  <a class="pay" id="pay" href="#">💳 PAY NOW</a>
+  <div class="upi">UPI ID: <b>7503395583@okbizaxis</b></div>
+  <div class="note">Scan the QR or tap PAY NOW using a UPI app.<br>After payment, please share the payment confirmation with Gamepay Cafe.</div>
+  <div class="brand">Gaming • Fun • Refreshments</div>
+</div>
+<script>
+const p=new URLSearchParams(location.search);
+const name=p.get('name')||'Customer';
+const amountRaw=p.get('amount')||'0';
+const amount=parseFloat(amountRaw.replace(/[^0-9.]/g,''))||0;
+const upi='7503395583@okbizaxis';
+const merchant='Gamepay Cafe';
+document.getElementById('customer').textContent=name;
+document.getElementById('amount').textContent='₹'+amount.toLocaleString('en-IN',{maximumFractionDigits:2});
+const upiUrl='upi://pay?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(merchant)+'&am='+encodeURIComponent(amount.toFixed(2))+'&cu=INR';
+document.getElementById('pay').href=upiUrl;
+const qrData=encodeURIComponent(upiUrl);
+document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=500x500&margin=12&data='+qrData;
+</script>
+</body>
+</html>
