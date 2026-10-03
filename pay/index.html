@@ -13,7 +13,7 @@
 .pay{display:block;border:0;width:100%;text-decoration:none;margin:20px auto 10px;background:#b8f0f2;color:#071014;font-weight:900;font-size:18px;padding:15px 20px;border-radius:14px;cursor:pointer}
 .copy{display:block;border:1px solid rgba(184,240,242,.35);width:100%;background:transparent;color:#fff;font-weight:700;font-size:14px;padding:12px 18px;border-radius:12px;cursor:pointer}
 .upi{font-size:13px;color:#b8c4c8;margin-top:12px}.upi b{color:#fff}.note{font-size:12px;color:#87979d;line-height:1.5;margin-top:18px}
-.brand{margin-top:22px;font-size:13px;font-weight:700;letter-spacing:1px}.status{font-size:12px;color:#b8f0f2;min-height:18px;margin-top:9px}
+.brand{margin-top:22px;font-size:13px;font-weight:700;letter-spacing:1px}.status{font-size:12px;color:#b8f0f2;min-height:18px;margin-top:9px}.mobileHint{font-size:12px;color:#9eafb5;margin-top:7px;line-height:1.4}
 </style>
 </head>
 <body>
@@ -26,6 +26,7 @@
   <div class="amount" id="amount">₹0</div>
   <div class="qr"><img id="qr" alt="Gamepay Cafe Payment QR"></div>
   <button class="pay" id="pay">💳 PAY NOW</button>
+  <div class="mobileHint">📱 <b>Mobile:</b> Tap PAY NOW to open your UPI app</div>
   <button class="copy" id="copy">📋 COPY UPI ID</button>
   <div class="upi">UPI ID: <b>7503395583@okbizaxis</b></div>
   <div class="status" id="status"></div>
@@ -47,9 +48,29 @@ document.getElementById('qr').src='https://api.qrserver.com/v1/create-qr-code/?s
 
 document.getElementById('pay').addEventListener('click',function(){
   const status=document.getElementById('status');
+  if(amount<=0){
+    status.textContent='Invalid payment amount.';
+    return;
+  }
   status.textContent='Opening your UPI app…';
-  window.location.href=upiUrl;
-  setTimeout(()=>{status.textContent='If nothing opened, scan the QR code with your phone.';},1500);
+
+  // Android Chrome: try the generic UPI intent first.
+  // If the browser/app does not support it, fall back to the normal UPI URI.
+  const intentUrl='intent://pay?pa='+encodeURIComponent(upi)+'&pn='+encodeURIComponent(merchant)+'&am='+encodeURIComponent(amount.toFixed(2))+'&cu=INR#Intent;scheme=upi;end';
+  const isAndroid=/Android/i.test(navigator.userAgent);
+
+  if(isAndroid){
+    window.location.href=intentUrl;
+    setTimeout(()=>{
+      window.location.href=upiUrl;
+    },900);
+  }else{
+    window.location.href=upiUrl;
+  }
+
+  setTimeout(()=>{
+    status.textContent='If nothing opened, scan the QR code with your phone.';
+  },1800);
 });
 document.getElementById('copy').addEventListener('click',async function(){
   try{await navigator.clipboard.writeText(upi);document.getElementById('status').textContent='UPI ID copied: '+upi;}
